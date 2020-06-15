@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: humanlongevity/hla
+
+%post
+
+# xhla has an r script that wants to use all cores on
+# a node. Patch that:
+
+echo 'install.packages("future", repos=c("http://cran.rstudio.com"))' | R --vanilla
+sed -i.orig 's/detectCores()/future::availableCores()/' /opt/bin/typing.r
+
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch 
+
+for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+
+%environment
+export LC_ALL=C
+

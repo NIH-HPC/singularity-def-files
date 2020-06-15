@@ -1,0 +1,47 @@
+Bootstrap: docker
+From: debian:9-slim
+
+%post
+    apt-get update
+    apt-get install -y \
+      r-base littler r-cran-ggplot2 r-cran-reshape2 r-cran-lazyeval \
+      libcairo2-dev `# for svglite R package` \
+      python \
+      python-pysam `# needs 'pysam >=0.8.4,<0.11.0', which is satisfied by the version here in Debian 9 (0.10.0)` \
+      python-numpy python-scipy python-pandas python-pyside \
+      python-pip curl
+    apt-get clean
+
+    export r_mirror="http://mirrors.nics.utk.edu/cran"
+    r <<__INSTALLCMDS__
+install.packages('svglite',repos="$r_mirror")
+__INSTALLCMDS__
+
+    pip install pyinstaller -U
+
+    curl -L https://mitosuite.com/latest/linux/MitoSuite_1.0.9b_linux_build.tar.gz | tar -xz
+    cd MitoSuite_1.0.9b_linux_build \
+    && sed -ri \
+         -e 's/sudo\s+//g' `# don't use sudo` \
+	 -e 's/getpass\.getpass.*/""/' `# remove password prompts from script` \
+	 mitosuite_installer.py \
+    && python mitosuite_installer.py \
+    || exit 1
+
+    # Create mount points and links to match our systems
+    mkdir \
+      /scratch \
+      /lscratch \
+      /spin1 \
+      /fdb \
+      /gpfs \
+      /data
+
+    for i in $(seq 1 30) # anticipate more GPFS directories than currently exist to avoid having to rebuilt the container later when new ones are added
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+
+%environment
+    export LC_ALL=C.UTF-8
+

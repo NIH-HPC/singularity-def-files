@@ -1,0 +1,37 @@
+BootStrap: docker
+From: ubuntu:16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/usr/local/bin:/bin:/usr/bin:$PATH
+export PYTHONPATH=/usr/lib/python2.7:$PYTHONPATH
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+######################################################################
+%post
+######################################################################
+
+# Install dependencies 
+apt-get update
+apt-get install -y locales python-dev python-pip wget vim
+locale-gen en_US.UTF-8
+apt-get clean
+
+pip install matplotlib==2.0.1 numpy==1.13.0 pysam==0.10.0 scipy==0.19.0 xlwt==1.2.0
+
+mkdir /gpfs /spin1 /scratch /fdb /lscratch
+for i in $(seq 3 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/bin:$PATH
+
+

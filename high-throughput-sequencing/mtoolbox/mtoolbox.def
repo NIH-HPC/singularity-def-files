@@ -1,0 +1,41 @@
+bootstrap: docker
+from: debian:stretch-slim
+
+%post
+    export PATH="/opt/mtoolbox:$PATH"
+    export LIBRARY_PATH="/opt/mtoolbox/bin/zlib/lib:$LIBRARY_PATH"
+    export LD_RUN_PATH="/opt/mtoolbox/bin/zlib/lib:$LD_RUN_PATH"
+    export PKG_CONFIG_PATH="/opt/mtoolbox/bin/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export CPATH="/opt/mtoolbox/bin/zlib/include:$CPATH"
+
+    apt-get update
+    apt-get install -y \
+        wget \
+        gcc \
+        g++ \
+        make \
+        perl-modules \
+        libio-all-perl \
+        bzip2 \
+        libncurses5-dev
+    wget https://github.com/mitoNGS/MToolBox/archive/master.tar.gz
+    tar -C /opt -xf master.tar.gz
+    mv /opt/MToolBox-master /opt/mtoolbox
+    cd /opt/mtoolbox
+    ./install.sh
+
+    # Use bundled Python interpreter
+    # see https://github.com/mitoNGS/MToolBox/issues/65
+    sed -i 's|/usr/bin/python|/usr/bin/env python|' /opt/mtoolbox/MToolBox/mapExome.py
+
+    # NIH HPC root-level symlinks
+    for i in $(seq 1 30)
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+
+%environment
+    export LC_ALL=C.UTF-8
+    export PATH="/opt/mtoolbox/MToolBox:$PATH"
+    . /opt/mtoolbox/MToolBox/setup.sh
+

@@ -1,0 +1,35 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+
+%post
+apt-get -y update
+apt-get install -y software-properties-common locales build-essential
+add-apt-repository universe
+apt-get -y update
+apt-get -y install curl git wget vim cmake libcunit1-dev libhdf5-dev libopenblas-dev 
+
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+apt-get install git-lfs
+git lfs install
+
+cd /opt
+git clone https://github.com/nanoporetech/flappie
+cd flappie
+make flappie
+
+#
+# mount points
+#
+mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do
+    ln -s /gpfs/gsfs${i} /gs${i}; done 
+
+apt-get clean
+
+%environment
+export LC_ALL=C
+export PATH=/opt/flappie:$PATH
+export OPENBLAS_NUM_THREADS=1
+

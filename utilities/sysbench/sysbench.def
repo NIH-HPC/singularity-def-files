@@ -1,0 +1,20 @@
+Bootstrap: library
+From: ubuntu:sha256.21678b2846063434e2009dee535d3e28ded35774ca72722e1d62b37077de30da
+
+%post
+    # add universe repos
+    echo "deb http://archive.ubuntu.com/ubuntu bionic main universe" \
+        >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-security main universe" \
+        >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-updates main universe" \
+        >>/etc/apt/sources.list
+    apt update
+    curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.deb.sh | bash
+    apt -y install sysbench
+    # make nih hpc specific links
+    mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+

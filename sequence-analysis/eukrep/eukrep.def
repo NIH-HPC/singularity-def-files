@@ -1,0 +1,41 @@
+Bootstrap: docker
+From: ubuntu:16.04
+
+######################################################################
+%post
+######################################################################
+apt-get -y update && apt-get install -y --no-install-recommends \
+    curl \
+    bzip2 \
+    vim \
+    git \
+    python-dev \
+    python-pip 
+    
+python -m pip install --upgrade pip setuptools wheel
+
+curl -O https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
+bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /anaconda && \
+rm Anaconda3-5.0.1-Linux-x86_64.sh
+
+export PATH=/anaconda/bin:$PATH
+
+conda install python=3.5 numpy ipython 
+
+cd / 
+git clone --recursive https://github.com/patrickwest/EukRep.git
+cd EukRep
+pip install EukRep                          
+
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 2 12); do ln -s /gpfs/gsfs$i /gs$i; done
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PYTHONPATH=/anaconda/lib/python3.5:/anaconda/lib/python3.5/site-packages:/visdom/lib/python3.5/site-packages:$PYTHONPATH
+export PATH=/anaconda/bin:/bin:/usr/bin:/EucRep/bin:$PATH
+export LD_LIBRARY_PATH=/anaconda/lib:$LD_LIBRARY_PATH
+
+

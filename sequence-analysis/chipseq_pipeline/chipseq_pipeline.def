@@ -1,0 +1,9 @@
+Bootstrap: docker
+From: quay.io/encode-dcc/chip-seq-pipeline:v1.2.0 
+
+%post
+         # create bind points for NIH HPC environment
+         mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+         for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

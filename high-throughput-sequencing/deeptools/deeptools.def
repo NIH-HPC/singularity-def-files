@@ -1,0 +1,73 @@
+Bootstrap: library
+From: ubuntu:sha256.80c52afadf3e7c3f9573de4fe79b7dca57fb3290df6c8dc46a75b02768a81146
+
+%labels
+    04062020 Jean
+
+%pre
+    apt-get install -y debootstrap
+
+%post
+    apt-get update
+    apt-get install -y wget
+    apt-get install -y gzip
+    apt-get install -y bzip2
+    apt-get install -y curl
+    apt-get install -y unzip
+
+    ## g++
+    apt-get install -y build-essential
+
+    # install anaconda
+    if [ ! -d /usr/local/anaconda ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/anaconda.sh && \
+    	bash ~/anaconda.sh -b -p /usr/local/anaconda && \
+    	rm ~/anaconda.sh
+    fi
+
+    # set anaconda path
+    export PATH=$PATH:/usr/local/anaconda/bin
+    conda update conda
+
+    conda config --add channels r
+    conda config --add channels defaults
+    conda config --add channels conda-forge
+    conda config --add channels bioconda
+
+    # Requirements
+    # Python 3.7
+    # numpy >= 1.8.0
+    # scipy >= 0.17.0
+    # py2bit >= 0.1.0
+    # pyBigWig >= 0.2.1
+    # pysam >= 0.8
+    # matplotlib >= 1.4.0
+    
+    conda install -y -c conda-forge python=3.7
+    conda install -y -c anaconda scipy>=0.17.0
+    conda install -y -c anaconda numpy>=1.8.0
+    conda install -y -c bioconda py2bit>=0.1.0
+    conda install -y -c bioconda pyBigWig>=0.2.1
+    conda install -y -c bioconda pysam>=0.8 
+    conda install -y -c bioconda matplotlib>=1.4.0
+    
+
+    # Install deeptools
+    echo "Installing latest deeptools release ..."
+    conda install -y -c bioconda deeptools=3.4.2
+
+    #VERSION="3.4.2"
+    #echo $VERSION".tar.gz" | wget --base=https://github.com/deeptools/deepTools/archive/ -i - -O deeptools_latest.tar.gz && tar -xvf deeptools_latest.tar.gz
+
+    # Let us save some space
+    conda clean --packages -y
+    conda clean --all -y
+
+    for i in $(seq 1 30);
+    do
+	ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export PATH=$PATH:/usr/local/anaconda/bin
+    export LANG=C

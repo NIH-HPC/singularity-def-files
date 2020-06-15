@@ -1,0 +1,65 @@
+BootStrap: docker
+From: debian:stretch
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Wolfgang Resch
+
+################################################################################
+%setup
+################################################################################
+mkdir -p ${SINGULARITY_ROOTFS}/opt
+cp -r /home/${USER}/atac_seq_pipeline/files/* ${SINGULARITY_ROOTFS}/opt
+
+
+################################################################################
+%post
+################################################################################
+
+apt-get update
+apt-get install --yes openjdk-8-jre-headless bzip2 wget gcc nano git
+apt-get clean
+
+cd /opt
+ls -lh
+bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda
+rm Miniconda3-latest-Linux-x86_64.sh
+
+tar -xzf bds_Linux.tgz
+mv .bds bds
+rm bds_Linux.tgz
+
+export PATH=/opt/bds:/opt/conda/bin:/opt/atac_seq_pipeline:$PATH
+
+cd atac_dnase_pipelines
+bash install_dependencies.sh
+
+# the installed R needs readline 6 instead of 7 which is installed
+# with the current anaconda. downdrade readline
+conda install -n bds_atac --yes readline=6.2
+
+# the bioconda macs2 package is a ziped egg. since it contains .so files
+# it has to be unpacked for import. that fails if multiple processes try to
+# unpack at the same time. maybe i am missing something? Either way - replacing
+# it with a pip install
+conda remove -n bds_atac macs2
+/opt/conda/envs/bds_atac/bin/pip install macs2
+
+conda clean --all
+
+# create some directories for mounting genome and data directories
+mkdir /genome /gpfs /spin1 /data /lscratch
+for i in 2 3 4 5 6 7 8 9 10 11 12; do ln -s /gpfs/gsfs$i /gs$i; done
+
+################################################################################
+%environment
+################################################################################
+export LC_ALL=C
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/bds:/opt/conda/bin:/opt/atac_seq_pipeline
+
+################################################################################
+%runscript
+################################################################################
+
+

@@ -1,0 +1,62 @@
+BootStrap: docker
+From: ubuntu:latest
+
+%pre
+    apt-get install -y debootstrap
+
+%post
+    apt-get update
+    apt-get install -y wget
+    apt-get install -y unzip
+    apt-get install -y git
+
+    ## zlib
+    apt-get install -y zlib1g-dev
+
+    ## g++
+    apt-get install -y build-essential
+
+    # install anaconda
+    if [ ! -d /usr/local/anaconda ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/anaconda.sh && \
+    	bash ~/anaconda.sh -b -p /usr/local/anaconda && \
+    	rm ~/anaconda.sh
+    fi
+
+    # set anaconda path
+    export PATH=$PATH:/usr/local/anaconda/bin
+    conda update conda
+
+    conda config --add channels r
+    conda config --add channels defaults
+    conda config --add channels conda-forge
+    conda config --add channels bioconda
+
+  
+    # Install csvkit
+    cd /opt
+    echo "Installing latest csvkit release ..."
+    #VERSION=""
+    #git clone --recursive https://github.com/ablab/TandemTools.git
+
+    #cd TandemTools
+    pip install csvkit==1.0.5
+
+    #export PATH=/usr/local/anaconda/bin:$PATH
+    #cd /opt/TandemTools/ext_tools/Flye/
+    #mkdir bin
+    #make
+
+    # Let us save some space
+    conda clean --packages -y
+    conda clean --all -y
+    rm -rf /usr/local/anaconda/pkgs
+
+    for i in $(seq 1 30);
+    do
+	ln -s /gpfs/gsfs${i} /gs${i};
+    done
+	    
+%environment
+    export PATH=$PATH:/usr/local/anaconda/bin
+    export LANG=C

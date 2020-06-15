@@ -1,0 +1,16 @@
+BootStrap: docker
+From: tejahpc/parliament2:0.1.7
+
+%post
+
+#
+# mount points
+#
+mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do
+    ln -s /gpfs/gsfs${i} /gs${i}; done 
+
+%environment
+export PATH=$PATH:/opt/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/
+

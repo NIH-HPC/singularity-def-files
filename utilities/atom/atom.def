@@ -1,0 +1,23 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    locale-gen en_US.UTF-8
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get -y install software-properties-common
+    add-apt-repository -y ppa:webupd8team/atom
+    apt-get -y update
+    apt-get -y install libxss1 x11-apps wget bzip2
+    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O /miniconda.sh
+    /bin/bash /miniconda.sh -b -p /opt/conda
+    rm ~/miniconda.sh
+    /opt/conda/bin/conda install -y jupyter
+    apt-get -y install atom
+
+    mkdir /gpfs /gs2 /gs3 /gs4 /gs5 /gs6 /spin1 /data /scratch
+    mkdir /fdb /lscratch /usr/local/Anaconda
+
+echo "
+export PATH=/opt/conda/bin:\$PATH" >>/environment
+

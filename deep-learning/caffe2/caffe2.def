@@ -1,0 +1,82 @@
+Bootstrap: docker
+From: caffe2ai/caffe2
+
+%post
+  #Default mount point used in Biowulf cluster
+  mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+  for i in $(seq 2 12); do ln -s /gpfs/gsfs$i /gs$i; done
+
+  apt-get -y update && apt-get install -y -q vim
+
+  cd /
+  rm -rf /caffe2
+  git clone --recursive https://github.com/caffe2/caffe2.git
+  
+  cd /caffe2/third_party
+  rm -rf python-peachpy
+  git clone https://github.com/Maratyszcza/PeachPy.git python-peachpy
+  cd python-peachpy
+  python setup.py develop
+
+  # Installing the dependencies needed by the Detectron from Facebook
+  pip install numpy>=1.13 pyyaml>=3.12 matplotlib opencv-python>=3.2 setuptools Cython mock scipy
+
+  export PYTHONPATH=/Detectron/lib:/caffe2/third_party/cocoapi/PythonAPI:/usr/local/lib/python2.7/dist-packages:/caffe2/modules/detectron:/usr/local:$PYTHONPATH
+  export LD_LIBRARY_PATH=/usr/local/lib:/proc/1/cwd/usr/local/lib/:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/.singularity.d/libs:$LD_LIBRARY_PATH
+  export CPLUS_INCLUDE_DIR=/caffe2/third_party/eigen:$CPLUS_INCLUDE_DIR
+  export C_INCLUDE_DIR=/caffe2/third_party/eigen:$C_INCLUDE_DIR
+
+  cd /caffe2/third_party
+  git clone https://github.com/cocodataset/cocoapi.git
+  cd cocoapi/PythonAPI
+  make install
+
+  pip install --upgrade git+https://github.com/Maratyszcza/confu
+
+  cd /caffe2/third_party
+  rm -rf ninja       && git clone https://github.com/ninja-build/ninja.git
+  cd /caffe2/third_party/ninja
+  ./configure.py --bootstrap
+  export PATH=/caffe2/third_party/ninja:$PATH
+
+  cd /caffe2/third_party/gloo && mkdir build && cd build
+  cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++
+  make
+  make install
+
+  cd /caffe2/third_party/NNPACK
+  confu setup
+  python ./configure.py
+  ninja
+
+# Make sure Eigen is installed
+  cd /caffe2/third_party/eigen
+  mkdir build && cd build
+  cmake ..
+  make install
+  cd /usr/include
+  ln -s /caffe2/third_party/eigen/Eigen
+
+# Rebuild Caffe2 (with detectron module and other new staff that was missing from Docker)
+  cd /caffe2 && mkdir -p build && cd build
+  cmake .. -Dpybind11_INCLUDE_DIR=../third_party/pybind11/include -DEigen_INCLUDE_DIRS=/caffe2/third_party/eigen
+  make 
+  make install
+
+# Install Detectron
+  cd /
+  git clone https://github.com/facebookresearch/detectron Detectron
+  cd /Detectron/lib 
+  make 
+
+%environment
+  export PYTHONPATH=/Detectron/lib:/caffe2/third_party/cocoapi/PythonAPI:/usr/local/lib/python2.7/dist-packages:/caffe2/modules/detectron:/usr/local:$PYTHONPATH
+  export LD_LIBRARY_PATH=/usr/local/lib:/proc/1/cwd/usr/local/lib/:/usr/local/cuda/lib64:/usr/local/cuda/lib64/stubs:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/.singularity.d/libs:$LD_LIBRARY_PATH
+
+%runscript
+  #Executes when the "singularity run" command is used
+  #Useful when you want the container to run as an executable
+
+%test
+  #Test script to verify that the image is built and running correctly
+

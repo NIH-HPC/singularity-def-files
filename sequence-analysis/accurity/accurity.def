@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: accurity.simg 
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export LC_ALL=Cexport LC_ALL=C
+export PATH=/usr/local/bin:/bin:/usr/bin:/opt/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:$LD_LIBRARY_PATH
+export PYTHONPATH=$LD_LIBRARY_PATH:/miniconda2/lib/python3.6:/miniconda2/lib/python3.6/site-packages:/visdom/lib/python3.6/site-packages:$PYTHONPATH
+
+################################################################################
+%files
+################################################################################
+freebayes     /usr/local/bin/freebayes
+samtools      /usr/local/bin/samtools
+code/accurity /usr/local/bin/accurity
+code/infer    /usr/local/bin/infer
+code/GADA     /usr/local/bin/GADA
+
+######################################################################
+%post
+######################################################################
+mkdir /gpfs /spin1 /scratch /fdb /lscratch
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

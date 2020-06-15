@@ -1,0 +1,69 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    rm -rf  /root/.singularity/cache/library
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Data integrity verified"
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+        grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+        grep -q "$MESSG"
+
+%post
+    apt-get update
+
+    # install and config python3
+    apt-get install -y python3 python3-pip wget git
+    ln -s python3 /usr/bin/python
+    ln -s pip3 /usr/bin/pip
+
+    # install cuda
+    cd /tmp
+    if [ ! -f cuda_10.0.130_410.48_linux ]; then
+        wget https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda_10.0.130_410.48_linux
+    fi
+    sh cuda-linux.10.0.130-24817639.run -noprompt
+    ln -s /usr/local/cuda-10.0 /usr/local/cuda
+    export CUDA_HOME=/usr/local/cuda
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+    export PATH=/usr/local/cuda/bin:$PATH
+
+    # install cudnn (must be already downloaded and present in /tmp)
+    if [ ! -d cuda ]; then
+        tar -xvf cudnn-10.0-linux-x64-v7.6.5.32.tar.gz
+    fi
+    cp cuda/include/cudnn.h /usr/local/cuda/include
+    cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
+    chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
+
+    # install tensorflow
+    pip install --upgrade tensorflow-gpu
+
+    # install app
+    git clone https://github.com/deepmedic/deepmedic.git
+    cd deepmedic
+    git checkout v0.8.0
+    export LC_ALL=C.UTF-8
+    pip install .
+
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export CUDA_HOME=/usr/local/cuda
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+    export PATH=/usr/local/cuda/bin:$PATH
+    export LC_ALL=C.UTF-8
+

@@ -1,0 +1,27 @@
+Bootstrap: docker                                                                  
+From: haoyangz/deepsea-predict-docker                                              
+                                                                                   
+%post            
+    apt-get update
+    apt-get install -y libbz2-dev liblzma-dev                                                          
+    chmod 755 /root # the software is installed here and there are lots of                 
+                    # hardcoded paths
+                                                                                
+    /opt/conda/bin/conda install matplotlib==1.4.3 biopython==1.67
+    
+    # install tabix
+    cd /tmp
+    git clone https://github.com/samtools/htslib.git
+    cd htslib && git checkout 1.9 && cd ..
+    make -C htslib
+    make -C htslib install
+                                                       
+    # make nih hpc specific links                                               
+    mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch                         
+    for i in $(seq 1 30); do                                                    
+        ln -s /gpfs/gsfs${i} /gs${i};                                           
+    done                                                                        
+                                                                                
+%environment                                                                    
+    export LC_ALL=C 
+

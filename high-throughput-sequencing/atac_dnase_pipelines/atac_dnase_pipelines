@@ -1,0 +1,65 @@
+#! /bin/bash
+
+#>NAME
+#>    atac_pipe
+#>SYNOPSIS
+#>    atac_pipe [--help|-h] [OPTIONS]
+#>DESCRIPTION
+#>    A Big Data Script based pipeline for
+#>    analyzing ATAC-seq and DNase-seq data.
+#>    Due to the nature of the install process
+#>    the pipeline is packaged into a singularity
+#>    container. This also means that it can't
+#>    submit jobs to slurm, so each pipeline
+#>    instance should be run as a separate, single
+#>    batch job.
+#>
+#>    If lscratch is allocated (it should be!), 
+#>    this wrapper script will use it.
+#>
+#>OPTIONS
+#>    The wrapper script passes all options except
+#>    --help directly to `bds atac.dbs`. See the
+#>    pipeline documentation for help at
+#>    https://github.com/kundajelab/atac_dnase_pipelines
+
+function fail {
+    echo "ERROR: $@" >&2
+    exit 1
+}
+
+function usage {
+    grep '^#>' ${BASH_SOURCE[0]} | sed 's/^#>//' >&2
+}
+
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    usage
+    exit
+fi
+
+#module load singularity || fail "Could not load required singularity/2.4 module"
+
+genomedir=/fdb/atac_dnase_pipelines
+sdir=$(cd $(dirname "$0") && pwd)
+libexecdir=$(cd ${sdir}/../libexec && pwd)
+
+###
+### bind mounts
+###
+if [[ ${SLURM_JOB_ID:-none} != "none" && -d "/lscratch/${SLURM_JOB_ID}" ]]; then
+    tmp="/lscratch/${SLURM_JOB_ID}/tmp"
+    mkdir -p $tmp
+    tmpmnt="-B /lscratch/$SLURM_JOB_ID/tmp:/tmp,/lscratch "
+else
+    tmp=$(mktemp -d $PWD/XXXX)
+    trap "rm -rf ${tmp}" EXIT
+    tmpmnt="-B ${tmp}:/tmp "
+fi
+
+singularity exec \
+    -B ${genomedir}:/genome \
+    -B ${sdir}/default.env:/opt/atac_dnase_pipelines/default.env \
+    -B /gpfs,/spin1,/data \
+    ${tmpmnt} \
+    ${libexecdir}/atac_dnase_pipelines.simg \
+    bds /opt/atac_dnase_pipelines/atac.bds "$@"

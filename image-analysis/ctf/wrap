@@ -1,0 +1,19 @@
+#!/bin/bash
+
+export SINGULARITY_BINDPATH="/vf,/gpfs,/spin1,/data,/lscratch,/scratch,/fdb"
+
+selfdir="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+
+cmd="$(basename $0)"
+
+singularity exec "${selfdir}/ctf.img" "$cmd" "$@"
+
+status=$?
+
+# The DataEditor communicates with other CTF tools using the msgd service
+# and the DataEditor will automatically launch this service if it isn't running.
+# This service is not killed when the singularity container exits and we end up
+# with a persistent process.
+pkill -u $USER -x -9 msgd
+
+exit $status

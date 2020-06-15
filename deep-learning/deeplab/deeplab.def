@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: Tensorflow_v1.10_gpu_WORKS.sqsh
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/cuda/bin:/usr/local/lib/bazel/bin
+export CUDA_HOME=/usr/local/cuda-9.0
+export LD_LIBRARY_PATH=$CUDA_HOME/lib:$CUDA_HOME/lib64/stubs:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:$LD_LIBRARY_PATH
+export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+
+################################################################################
+%post
+################################################################################
+apt-get install -y python3-pil 
+pip3 install numpy jupyter matplotlib six
+# also need: PIL, tf-slim (from "tensorflow/models/research/") Jupyter notebook
+
+cd /usr/bin
+rm -f python
+ln -s python3.5 python
+

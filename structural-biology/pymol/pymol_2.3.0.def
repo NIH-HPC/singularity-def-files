@@ -1,0 +1,42 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    echo "Hello from inside the container"
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get update
+    apt-get -y install subversion build-essential python3-dev python-pmw libglew-dev \
+      freeglut3-dev libpng-dev libfreetype6-dev libxml2-dev \
+      libmsgpack-dev python3-pyqt5.qtopengl \
+      git libnetcdf-dev libglm-dev
+    apt-get update
+    apt-get clean
+
+# Build everything in /opt
+    mkdir /opt/downloads
+    git clone https://github.com/schrodinger/pymol-open-source.git
+    git clone https://github.com/rcsb/mmtf-cpp.git
+    mv mmtf-cpp/include/mmtf* pymol-open-source/include/
+    cd pymol-open-source
+    
+    prefix=/opt/pymol
+    modules=$prefix/modules
+    python3 setup.py build install \
+      --home=$prefix \
+      --install-lib=$modules \
+      --install-scripts=$prefix
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /lscratch /vf /usr/local/apps
+    for i in  3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+    ln -s /spin1/USERS1 /data
+    ln -s /vf/db /fdb
+    ln -s /spin1/pdb /pdb
+    ln -s /spin1/scratch /scratch
+
+%environment
+    export LC_ALL=C
+    export PATH=$PATH:/opt/pymol

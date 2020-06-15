@@ -1,0 +1,51 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+apt-get update
+apt-get -y upgrade
+apt-get install -y software-properties-common
+add-apt-repository universe
+apt-get install -y python-dev build-essential vim git wget bzip2 zlib1g-dev
+wget https://bootstrap.pypa.io/get-pip.py 
+python get-pip.py 
+pip install --upgrade pip
+
+### install dependencies
+pip install numpy
+apt-get -y install libblas-dev liblapack-dev
+apt-get -y install libgsl-dev
+apt-get -y install gfortran
+
+cd /usr/lib/x86_64-linux-gnu
+ln -s libgsl.so.19.0.0 libgsl.so.0
+
+### install STAR
+cd /
+git clone https://github.com/alexdobin/STAR.git
+cd STAR/source
+make STAR
+
+### Install rmats
+cd /
+wget https://sourceforge.net/projects/rnaseq-mats/files/MATS/rMATS.4.0.2.tgz
+tar -xzf rMATS.4.0.2.tgz
+apt-get clean
+rm rMATS.4.0.2.tgz
+
+mkdir /gpfs /spin1 /scratch /lscratch /data /fdb
+ for i in $(seq 1 30)
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+chmod 775 /rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py
+
+
+%environment
+export LC_ALL=C 
+export PATH=/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/:/STAR/bin/Linux_x86_64:$PATH
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
+export LD_LIBRARY_PATH
+

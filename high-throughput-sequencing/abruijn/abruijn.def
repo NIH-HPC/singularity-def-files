@@ -1,0 +1,52 @@
+BootStrap: debootstrap
+OSVersion: stable
+MirrorURL: http://ftp.us.debian.org/debian/
+
+################################################################################
+%post
+################################################################################
+# Notes: with 2.x abruijn has been renamed flye
+
+apt-get update
+apt-get install -y vim gcc make git g++ curl bzip2 python wget
+apt-get clean
+
+# installing blasr from source is a huge pain, so using miniconda (which
+# is overkill, i admit)
+
+APP=ABruijn
+APPVER=1.0
+
+mkdir -p /opt
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda
+. /opt/conda/etc/profile.d/conda.sh
+conda activate base
+conda create -n tools python=2.7
+conda activate tools
+conda config --env --append channels bioconda
+conda config --env --append channels conda-forge
+# note: newer versions of hdf5 do not provide libhdf5_cpp.so.12 required
+# by blasr. also the 5.3 versions are broken
+conda install --yes conda-forge::hdf5==1.8.17 bioconda::blasr==5.2p1
+conda clean --all --yes
+
+
+# install ABruijn 1.0
+cd /opt
+git clone https://github.com/fenderglass/Flye.git
+cd Flye
+git checkout ${APPVER}
+python setup.py build
+
+# mount points
+#
+mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+################################################################################
+%environment
+################################################################################
+export LC_ALL=C
+export PATH=/opt/conda/envs/tools/bin:/opt/Flye/bin:$PATH
+

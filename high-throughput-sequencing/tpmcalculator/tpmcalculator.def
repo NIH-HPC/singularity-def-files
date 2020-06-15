@@ -1,0 +1,36 @@
+Bootstrap: library
+From: ubuntu:18.04
+
+%post
+apt-get update 
+apt-get install -y git
+apt-get install -y gcc
+apt-get install -y g++
+apt-get install -y cmake
+apt-get install -y zlib1g-dev
+git clone https://github.com/pezmaster31/bamtools.git
+cd bamtools
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../ ..
+make
+make install
+cd ..
+export BAMTOOLS_DIR=`pwd`
+export CPPFLAGS="-I $BAMTOOLS_DIR/include/bamtools/"
+export LDFLAGS="-L $BAMTOOLS_DIR/lib -Wl,-rpath,$BAMTOOLS_DIR/lib"
+
+cd ..
+git clone https://github.com/ncbi/TPMCalculator
+cd TPMCalculator
+make
+
+ln -s /TPMCalculator/bin/TPMCalculator /usr/local/bin
+
+# Create symbolic links for the NIH HPC systems
+for i in $(seq 1 30)
+do
+ln -s /gpfs/gsfs$i /gs$i
+done
+
+

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export SINGULARITY_BINDPATH="/vf,/gpfs,/spin1,/data,/lscratch,/scratch,/fdb"
+
+selfdir="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+
+cmd="$(basename $0)"
+
+#SINGULARITYENV_PATH="/opt/mtoolbox/MToolBox:/opt/mtoolbox/bin/anaconda/bin:$PATH" \
+singularity exec --overlay "${selfdir}/errata.img" "${selfdir}/mtoolbox.simg" "$cmd" "$@"

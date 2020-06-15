@@ -1,0 +1,35 @@
+From: silasysh/annogesic:latest      
+Bootstrap: docker
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/usr/local/bin:/bin:/usr/bin:$PATH
+export PYTHONPATH=/ANNOgesic:$PYTHONPATH
+
+######################################################################
+%post
+######################################################################
+mkdir /gpfs /spin1 /scratch /fdb /lscratch
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+cd /
+wget https://github.com/Sung-Huan/ANNOgesic/archive/v.1.0.2.tar.gz
+tar -zxf v.1.0.2.tar.gz 
+rm -f v.1.0.2.tar.gz 
+mv ANNOgesic-v.1.0.2 ANNOgesic
+cd ANNOgesic/annogesiclib
+touch __init__.py
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/bin:$PATH
+
+

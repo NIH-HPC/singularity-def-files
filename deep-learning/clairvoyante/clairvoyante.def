@@ -1,0 +1,63 @@
+BootStrap: docker
+From: nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+
+################################################################################
+%labels
+################################################################################
+Clairvoyante version 1.0
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/cuda/bin:
+export LC_ALL=C
+
+################################################################################
+%files
+################################################################################
+v1.tar.gz /tmp/v1.tar.gz
+
+################################################################################
+%post
+################################################################################
+
+###
+### Install useful packages
+###
+apt-get update
+apt-get install -y libhdf5-dev graphviz python-dev python-pip git curl wget samtools
+pip install tensorflow-gpu
+pip install blosc  
+pip install intervaltree  
+pip install numpy 
+
+###
+### Install Clairvoyante
+###
+cd /tmp
+# wget https://github.com/aquaskyline/Clairvoyante/archive/v1.tar.gz
+tar -zxf v1.tar.gz 
+mv Clairvoyante-1 /Clairvoyante
+
+###
+### Install PyPy
+###
+apt-get update
+apt-get install -y pypy pypy-dev
+pip install -U pip wheel intervaltree blosc
+
+cd /tmp && wget https://bootstrap.pypa.io/get-pip.py
+pypy get-pip.py
+pypy -m pip install blosc  
+pypy -m pip install --no-cache-dir intervaltree==2.1.0
+
+#locale-gen en_US.UTF-8
+apt-get clean
+
+###
+### Destination for NIH HPC bind mounts
+###
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 3 20); do ln -s /gpfs/gsfs$i /gs$i; done
+

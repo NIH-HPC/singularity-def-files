@@ -1,0 +1,57 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+apt-get update -qq
+
+# install dotnet
+apt-get -y install gnupg
+apt-get -y install apt-transport-https
+sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
+apt-get -f -y install software-properties-common
+apt-add-repository ppa:lttng/stable-2.9
+apt-get update
+apt-get -f -y install liblttng-ust0
+apt-get -f -y install libpng12-0
+apt-get -f -y --allow-unauthenticated install dotnet-sharedframework-microsoft.netcore.app-2.0.0 
+apt-get -f -y --allow-unauthenticated install dotnet-dev-1.0.4
+apt-get -f -y install wget
+cd /usr/local
+
+wget https://github.com/Illumina/canvas/releases/download/1.40.0.1613%2Bmaster/Canvas-1.40.0.1613.master_x64.tar.gz
+tar -xf Canvas-1.40.0.1613.master_x64.tar.gz
+mv Canvas-1.40.0.1613+master_x64 Canvas-1.40
+chmod +x /usr/local/Canvas-1.40/tabix
+chmod +x /usr/local/Canvas-1.40/bedGraphToBigWig
+#chmod +x /usr/local/Canvas-1.40/Canvas
+chmod +x /usr/local/Canvas-1.40/Tools/EvaluateCNV/tabix
+chmod +x /usr/local/Canvas-1.40/Tools/EvaluateCNV/bedGraphToBigWig
+chmod +x /usr/local/Canvas-1.40/CanvasPedigreeCaller/bedGraphToBigWig
+chmod +x /usr/local/Canvas-1.40/CanvasPedigreeCaller/tabix
+chmod +x /usr/local/Canvas-1.40/CanvasPedigreeCaller/tabix.exe
+mv /usr/share/dotnet/shared/Microsoft.NETCore.App/2.0.0-preview1-002111-00 /usr/share/dotnet/shared/Microsoft.NETCore.App/2.0.0
+
+# mount points
+mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do
+    ln -s /gpfs/gsfs${i} /gs${i}; done
+# cleanup
+apt-get clean
+
+# set up the environment for the image
+cat > /environment <<EOF
+if test -z "\$SINGULARITY_INIT"; then
+      PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/Canvas-1.40/
+      LANG=en_US.UTF-8
+      PS1="Singularity.$SINGULARITY_CONTAINER> $PS1"
+      SINGULARITY_INIT=1
+      export PATH PS1 SINGULARITY_INIT LANG
+fi
+EOF
+
+
+
+

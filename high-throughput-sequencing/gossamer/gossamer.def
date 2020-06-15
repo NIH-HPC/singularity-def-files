@@ -1,0 +1,48 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+
+%post
+    locale-gen en_US.UTF-8
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get -y update
+    apt-get -y install g++ cmake libboost-all-dev pandoc \
+        zlib1g-dev libbz2-dev libsqlite3-dev git
+    git clone https://github.com/data61/gossamer.git
+    mkdir -p gossamer/build
+    cd gossamer/build
+    cmake ..
+    make 
+    make test
+    make install    
+    apt-get clean 
+
+mkdir \
+  /scratch \
+  /lscratch \
+  /spin1 \
+  /fdb \
+  /gpfs \
+  /data
+for i in $(seq 1 20) # anticipate more GPFS directories than currently exist
+do
+  ln -s /gpfs/gsfs$i /gs$i
+done
+
+
+%runscript
+#!/bin/sh
+cat <<EOC
+
+    This Singularity image contains $APP version $VER, 
+    along with a minimal installation of Ubuntu 16.04 and all 
+    necessary dependencies.  Use it by running one of the
+    following:
+        singularity exec gossamer.img goss <args>
+        singularity exec gossamer.img xenome <args>
+        singularity exec gossamer.img electus <args>
+        singularity exec gossamer.img gossple <args>    
+        
+EOC
+

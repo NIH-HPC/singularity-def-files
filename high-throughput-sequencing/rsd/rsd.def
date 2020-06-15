@@ -1,0 +1,61 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    echo "Hello from inside the container"
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get update
+    apt-get -y install build-essential manpages unzip vim wget python python-dev python-setuptools make git
+    apt-get update
+    apt-get clean
+
+# Build everything in /opt
+    cd /opt
+    mkdir downloads
+
+# KALIGN 2.0.4
+    cd /opt
+    wget -P downloads http://msa.sbc.su.se/downloads/kalign/current.tar.gz
+    mkdir kalign2
+    cd kalign2
+    tar xzf ../downloads/current.tar.gz
+    ./configure
+    make
+
+# BLAST 2.2.24+
+    cd /opt
+    wget -P downloads ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.2.24/ncbi-blast-2.2.24+-x64-linux.tar.gz
+    tar xzf downloads/ncbi-blast-2.2.24+-x64-linux.tar.gz
+
+# PAML 4.4
+    cd /opt
+    wget -P downloads http://abacus.gene.ucl.ac.uk/software/SoftOld/paml4.4e.tar.gz
+    tar xzf downloads/paml4.4e.tar.gz
+    cd paml44/
+    rm bin/*.exe
+    cd src
+    make
+    mv baseml codeml basemlg mcmctree pamp evolver yn00 chi2 ../bin
+
+# RSD
+    cd /opt
+    git clone https://github.com/todddeluca/reciprocal_smallest_distance
+    cd reciprocal_smallest_distance
+    python setup.py install
+
+# Fix permissions
+    find /opt -perm /u+rx ! -perm /o+rx -exec /bin/chmod a+rx {} +
+    find /opt -perm /u+r ! -perm /o+r -exec /bin/chmod a+r {} +
+    chown -R root.root /opt
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb
+    for i in 2 3 4 5 6 7 8 9 10 11 12; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/kalign2:/opt/ncbi-blast-2.2.24+/bin:/opt/paml44/bin:/opt/reciprocal_smallest_distance/bin:$PATH
+

@@ -1,0 +1,48 @@
+BootStrap: docker
+From: nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+
+%files
+/home/${USER}/nv-tensorrt-repo-ubuntu1604-cuda9.0-trt5.0.0.10-rc-20180906_1-1_amd64.deb /opt
+/home/${USER}/TensorRT-5.0.0.10.Red-Hat.x86_64-gnu.cuda-9.0.cudnn7.3.tar.gz /opt
+
+%post
+
+apt-get update
+apt-get install -y --no-install-recommends curl build-essential cmake git vim software-properties-common
+
+add-apt-repository ppa:deadsnakes/ppa
+apt-get update
+apt-get install -y python3.6
+
+##BASE=/opt/miniconda
+##cd /opt
+##curl -o miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+##bash miniconda.sh -b -p ${BASE}
+##export PATH=$BASE/bin:$PATH
+
+# Install tensorrt from the Debian package
+dpkg -i /opt/nv-tensorrt-repo-ubuntu1604-cuda9.0-trt5.0.0.10-rc-20180906_1-1_amd64.deb
+apt-key add /var/nv-tensorrt-repo-cuda9.0-trt5.0.0.10-rc-20180906/7fa2af80.pub
+apt-get update
+apt-get install -y tensorrt
+
+apt-get install -y python3-libnvinfer-dev
+apt-get install -y uff-converter-tf
+
+apt-get install -y libnvinfer5
+
+cd /opt
+tar xf TensorRT-5.0.0.10.Red-Hat.x86_64-gnu.cuda-9.0.cudnn7.3.tar.gz
+mv TensorRT-5.0.0.10 tensorrt
+cd tensorrt/samples
+make all
+
+mkdir /gpfs /spin1 /gs2 /gs3 /gs4 /gs5 /gs6 /gs7 /gs8 /data /scratch /fdb /lscratch
+
+apt-get clean
+
+%environment
+#export PATH=/opt/tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/tensorrt/bin
+
+

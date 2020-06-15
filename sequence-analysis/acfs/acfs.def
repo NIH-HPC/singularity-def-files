@@ -1,0 +1,61 @@
+Bootstrap: docker
+From: ubuntu:16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+######################################################################
+%environment
+######################################################################
+export PYTHONPATH=/miniconda2/lib/python2.7:/miniconda2/lib/python2.7/site-packages:$PYTHONPATH
+export PATH=/sratoolkit.2.9.0-centos_linux64/bin:/acfs/bwa-0.7.3a:/acfs:/miniconda2/bin:/usr/bin:$PATH
+export LD_LIBRARY_PATH=/miniconda2/lib:/lib64:/lib:/usr/lib64:/usr/lib:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=/usr/include
+
+######################################################################
+%post
+######################################################################
+apt-get -y update && apt-get install -y --no-install-recommends \
+    vim \
+    git \
+    wget \
+    curl \
+    zlib1g-dev \
+    python-dev \
+    python-pip \
+    build-essential
+
+python -m pip install --upgrade pip setuptools wheel
+
+# Install miniconda2
+#
+cd /tmp
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh -b -f -p /miniconda2
+rm Miniconda2-latest-Linux-x86_64.sh
+
+export PATH=/miniconda2/bin:/bin:/usr/bin:/usr/local/bin:/usr/local/cuda/bin:$PATH
+conda install -c anaconda perl 
+conda install -c bioconda blat 
+
+cd /
+git clone --recursive https://github.com/arthuryxt/acfs.git
+cd acfs
+chmod +x *.pl
+tar -xvf bwa-0.7.3a.tar
+rm -f bwa-0.7.3a.tar
+export C_INCLUDE_PATH=/usr/include
+cd bwa-0.7.3a && make
+
+# Install SRA toolkit:
+cd /
+wget http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.9.0/sratoolkit.2.9.0-centos_linux64.tar.gz
+tar -zxf sratoolkit.2.9.0-centos_linux64.tar.gz
+rm -f sratoolkit.2.9.0-centos_linux64.tar.gz
+
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

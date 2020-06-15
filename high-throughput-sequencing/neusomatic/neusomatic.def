@@ -1,0 +1,10 @@
+Bootstrap: docker
+From: msahraeian/neusomatic:0.2.1
+
+%post
+    # Create symbolic links for the NIH HPC systems
+    for i in $(seq 1 30)
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+

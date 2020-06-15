@@ -1,0 +1,36 @@
+BootStrap: docker
+From: quay.io/wtsicgp/dockstore-cgpwgs:2.1.0
+
+%post
+apt-get -y update
+apt-get install -y software-properties-common
+add-apt-repository universe
+apt-get -y update
+apt-get -y install git cpanminus make zlib1g-dev libcurl4-openssl-dev libssh2-1-dev libxml2-dev git g++ curl libssl-dev 
+cd /opt
+git clone https://github.com/cancerit/cgpBattenberg.git
+cd cgpBattenberg
+./setup.sh /opt/wtsi-cgp/
+cd Rsupport
+./setupR.sh /opt/wtsi-cgp
+
+R -q -e 'source("http://bioconductor.org/biocLite.R"); biocLite(c("devtools", "readr", "doParallel", "ggplot2", "RColorBrewer", "gridExtra", "gtools"));'
+R -q -e 'devtools::install_github("Crick-CancerGenomics/ascat/ASCAT")'
+R -q -e 'devtools::install_github("Wedge-Oxford/battenberg")'
+
+mkdir \
+  /scratch \
+  /lscratch \
+  /spin1 \
+  /fdb \
+  /gpfs \
+  /data
+for i in $(seq 1 15) # anticipate more GPFS directories than currently exist
+do
+  ln -s /gpfs/gsfs$i /gs$i
+done
+
+%environment
+export LC_ALL=C 
+
+

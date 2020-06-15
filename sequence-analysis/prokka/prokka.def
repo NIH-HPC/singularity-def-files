@@ -1,0 +1,39 @@
+BootStrap: docker
+From: debian:stretch-slim
+
+######################################################################
+%post
+######################################################################
+apt-get -y update
+apt-get install -y curl wget nano bzip2 less
+
+# miniconda
+mkdir -p /opt
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+. /opt/conda/etc/profile.d/conda.sh
+conda activate base
+conda update --yes --all
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda create -n prokka prokka==1.13
+
+
+# create bind points for NIH HPC environment
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+# clean up
+apt-get clean
+conda clean --yes --all
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/conda/envs/prokka/bin:$PATH
+
+######################################################################
+%runscript
+######################################################################
+

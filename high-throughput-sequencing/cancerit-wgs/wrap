@@ -1,0 +1,17 @@
+#!/bin/bash
+
+
+export SINGULARITY_BINDPATH="/vf,/gpfs,/spin1,/data,/lscratch,/scratch,/fdb"
+
+selfdir="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+
+cmd="$(basename $0)"
+
+# battenberg needs impute2 which isn't included in the container for some reason
+# downloaded from https://mathgen.stats.ox.ac.uk/impute/impute_v2.3.2_x86_64_static.tgz
+# and bind mounted in the container
+
+impute2=/usr/local/apps/cancerit-wgs/2.0.1/libexec/impute_v2.3.2_x86_64_static/impute2
+
+#singularity exec "${selfdir}/ascatngs_docker.img" "$cmd" "$@"
+singularity exec -B ${impute2}:/opt/wtsi-cgp/bin/impute2 "${selfdir}/cpgwgs.sif" "$cmd" "$@"

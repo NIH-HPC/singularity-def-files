@@ -1,0 +1,82 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    echo 'deb http://security.ubuntu.com/ubuntu xenial-security main restricted' >> /etc/apt/sources.list
+    apt-get update
+    apt-get -y install wget tar
+    apt-get update
+    apt-get clean
+
+# Install Mono
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+    apt -y install apt-transport-https ca-certificates
+    echo "deb https://download.mono-project.com/repo/ubuntu stable-xenial main" | tee /etc/apt/sources.list.d/mono-official-stable.list
+    apt-get update
+    apt-get -y install mono-devel
+    apt-get -y install mono-complete
+
+# Increase default memory map count
+    sysctl -w vm.max_map_count=1000000
+
+# Install MaxQuant
+    cd /opt
+    # needed to copy in MaxQuant_1.6.3.3.tgz from private location
+    tar xzf MaxQuant_1.6.3.3.tgz
+    chmod -R a+rX /opt/MaxQuant
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12 13 14 15 16; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C
+
+# MaxQuantCmd.exe
+
+%apphelp MaxQuantCmd.exe
+
+usage: singularity run --app MaxQuantCmd.exe mqpar.xml
+
+MaxQuantCmd 1.6.3.3
+Copyright © Max-Planck-Institute of Biochemistry 2010
+USAGE:
+Complete run of an existing mqpar.xml file:
+MaxQuantCmd.exe mqpar.xml
+Print job ids/names table:
+MaxQuantCmd.exe --dryrun mqpar.xml
+Rerunning second and third parts of the analysis:
+MaxQuantCmd.exe --partial-processing-end=3 --partial-processing=1 mqpar.xml
+
+  -p, --partial-processing        (Default: 0) Start processing from the specified job id. Can be used to continue/redo parts of the processing. Job id's can be obtained in the MaxQuant GUI
+                                  partial processing view or from --dryrun option.
+
+  -e, --partial-processing-end    (Default: 2147483647) Finish processing at the specified job id. 0-based indexing is used.
+
+  -n, --dryrun                    Print job ids and job names table.
+
+  -c, --create                    Create a template of MaxQuant parameter file.
+
+  --help                          Display this help screen.
+
+  --version                       Display version information.
+
+  mqpar (pos. 0)                  Required. Path to the mqpar.xml file. If you do not have an mqpar.xml, you can generate one using the MaxQuant GUI or use --create option.
+
+%apprun MaxQuantCmd.exe
+
+    exec mono /opt/MaxQuant/bin/MaxQuantCmd.exe "$@"
+
+# MaxQuantGui.exe
+
+%apphelp MaxQuantGui.exe
+
+    usage: singularity run --app MaxQuantGui.exe
+
+%apprun MaxQuantGui.exe
+
+    exec mono /opt/MaxQuant/bin/MaxQuantGui.exe
+

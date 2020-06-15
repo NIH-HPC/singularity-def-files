@@ -1,0 +1,54 @@
+Bootstrap: library
+From: ubuntu:sha256.21678b2846063434e2009dee535d3e28ded35774ca72722e1d62b37077de30da
+
+%post
+    # add universe repos
+    echo "deb http://archive.ubuntu.com/ubuntu bionic main universe" \
+        >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-security main universe" \
+        >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-updates main universe" \
+        >>/etc/apt/sources.list
+    apt update
+
+    # install some dependencies
+    apt install -y r-mathlib zlib1g-dev build-essential cmake python3-pip git
+    pip3 install --no-cache-dir cget
+
+    # some of the packages we need to compile have the -Werror directive set in
+    # the build files. This prevents the packages from building with newer
+    # compilers, so we roll back to an older compiler.
+    apt install -y gcc-4.8 g++-4.8 g++-4.8-multilib gcc-4.8-multilib
+    ln -f /usr/bin/gcc-4.8 /usr/bin/gcc
+    ln -f /usr/bin/g++-4.8 /usr/bin/g++
+
+    # do the build
+    cd /opt
+    git clone https://github.com/statgen/raremetal.git
+    cd raremetal
+    git checkout v4.15.1
+    export LC_ALL=C.UTF-8 LANG=C.UTF-8
+    cget install -f requirements.txt
+    mkdir build && cd build
+    cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_TOOLCHAIN_FILE=../cget/cget/cget.cmake \
+        -DBUILD_TESTS=1 ..
+    make
+    mv raremetal /usr/local/bin
+    mv raremetalworker /usr/local/bin
+
+    # create symbolic links for the NIH HPC systems
+    for i in $(seq 1 30)
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+
+    # do some cleanup
+    pip3 uninstall -y cget
+    apt purge -y build-essential cmake python3-pip git gcc-4.8 g++-4.8 \
+        g++-4.8-multilib gcc-4.8-multilib
+    apt clean
+    apt autoremove -y
+    rm -rf /opt/raremetal
+

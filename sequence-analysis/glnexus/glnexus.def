@@ -1,0 +1,52 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%files
+. /GLnexus
+
+%labels
+MAINTAINER Antonio Ulloa
+
+%post
+# Singularity recipe obtanied frmo Dockerfile for building GLnexus (converted using SPython). 
+# The resulting container image runs the unit tests
+# by default. It has in its working directory the statically linked glnexus_cli
+# executable which can be copied out.
+for i in $(seq 1 30)
+do 
+    ln -s /gpfs/gsfs$i /gs$i 
+done
+
+LC_ALL=C.UTF-8
+LANG=C.UTF-8
+DEBIAN_FRONTEND=noninteractive
+
+# dependencies
+apt-get -qq update && \
+apt-get -qq install -y --no-install-recommends --no-install-suggests \
+curl wget ca-certificates git-core less netbase \
+g++ cmake autoconf make file valgrind \
+libjemalloc-dev libzip-dev libsnappy-dev libbz2-dev zlib1g-dev liblzma-dev libzstd-dev \
+python-pyvcf
+
+# Copy in the local source tree / build context
+cd /GLnexus
+
+# compile GLnexus
+cmake -DCMAKE_BUILD_TYPE=$build_type . && make -j4
+
+# set up default container start to run tests
+
+
+%environment
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+export DEBIAN_FRONTEND=noninteractive
+%runscript
+cd /GLnexus
+exec /bin/bash ctest -V "$@"
+%startscript
+cd /GLnexus
+exec /bin/bash ctest -V "$@"
+
+

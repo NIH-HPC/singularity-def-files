@@ -1,0 +1,7 @@
+#!/bin/bash
+SINGULARITY_BINDPATH="/vf,/gpfs,/spin1,/data,/scratch,/fdb,/lscratch"
+export SINGULARITY_BINDPATH
+module load singularity
+dir=$(dirname  "$0")
+args="$@"
+singularity exec $dir/rmats4.img python /rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py $args

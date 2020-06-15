@@ -1,0 +1,56 @@
+BootStrap: docker
+From: ubuntu:16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/GLU/1.0b3/glu-1.0b3-prerelease4-Linux_x86-64:/usr/local/python2.7.2/bin:/bin:/usr/bin:/usr/local/bin:$PATH
+export LD_LIBRARY_PATH=/GLU/1.0b3/glu-1.0b3-prerelease4-Linux_x86-64:/usr/local/python2.7.2/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=/GLU/1.0b3/glu-1.0b3-prerelease4-Linux_x86-64:$PYTHONPATH
+
+################################################################################
+%post
+################################################################################
+export PATH=/usr/local/python2.7.2/bin:/bin:/usr/bin:/usr/local/bin:$PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/python2.7.2/lib
+
+apt-get update
+apt-get install -y vim wget make curl gcc git build-essential checkinstall
+
+# Install GLU
+mkdir -p /GLU/1.0b3 && cd /GLU/1.0b3
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/glu-genetics/glu-1.0b3-prerelease4-Linux_x86-64.tar.bz2
+tar xjvf glu-1.0b3-prerelease4-Linux_x86-64.tar.bz2
+
+cd /
+git clone  https://github.com/bioinformed/glu-genetics.git
+
+# Install prerequisites
+#apt-get update && sudo apt-get -y upgrade
+apt-get install -y python-pip 
+
+cd /tmp
+wget https://www.python.org/ftp/python/2.7.2/Python-2.7.2.tgz
+tar xvf Python-2.7.2.tgz
+cd Python-2.7.2/
+./configure --prefix /usr/local/python2.7.2 --enable-ipv6
+make
+make install
+
+apt-get install -y python-tables
+pip install tables
+pip install biopython
+
+###
+### Destination for NIH HPC bind mounts
+###
+
+mkdir /gpfs /spin1 /scratch /fdb /lscratch /data
+for i in $(seq 3 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

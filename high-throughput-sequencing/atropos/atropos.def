@@ -1,0 +1,52 @@
+BootStrap: docker
+From: ubuntu:16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/usr/local/bin:/bin:/usr/bin:$PATH
+
+export PYTHONPATH=/Atropos:/usr/lib/python3:$PYTHONPATH
+
+export LD_LIBRARY_PATH=/usr/lib/python3.5/lib-dynload:/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+######################################################################
+%post
+######################################################################
+
+# Install dependencies 
+apt-get update
+apt-get install -y locales python3-dev python3-pip wget vim
+locale-gen en_US.UTF-8
+apt-get clean
+ln -s /usr/bin/python3.5 /usr/bin/python
+
+pip3 install pytest progressbar2 tqdm pysam khmer==2.0 jinja2 # srastream ngs ngstream 
+pip3 install Cython 
+#pip3 install atropos
+
+cd /
+wget https://github.com/jdidion/atropos/archive/1.1.18.tar.gz
+tar -zxf 1.1.18.tar.gz   
+rm -f 1.1.18.tar.gz   
+mv /atropos-1.1.18 /Atropos   
+#touch /Atropos/atropos/__init__.py /Atropos/tests/__init__.py
+cd /Atropos
+#python setup.py 
+make all
+
+mkdir /gpfs /spin1 /scratch /fdb /lscratch /data
+for i in $(seq 3 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/bin:$PATH
+
+

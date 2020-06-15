@@ -1,0 +1,32 @@
+BootStrap: debootstrap
+OSVersion: trusty
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+
+%post
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+apt-get update
+apt-get -y upgrade
+apt-get install -y wget gcc g++ make
+apt-get install -y software-properties-common
+add-apt-repository universe
+apt-get -y install python
+apt-get install -y libpopt0 libpopt-dev libcppunit-doc  libcppunit-dev
+
+### install RDock
+wget ftp://helix.nih.gov/pub/rDock_2013.1_src.tar.gz
+tar xvzf rDock_2013.1_src.tar.gz
+cd rDock_2013.1_src/build
+make linux-g++-64
+
+mkdir /gpfs /spin1 /scratch /lscratch /data /fdb
+for i in 2 3 4 5 6 7 8 9 10 11 12; do
+    ln -s /gpfs/gsfs${i} /gs${i}; done
+
+%environment
+export LC_ALL=C
+export RBT_ROOT=/rDock_2013.1_src
+export LD_LIBRARY_PATH=$RBT_ROOT/lib:$LD_LIBRARY_PATH
+export PATH=$RBT_ROOT/bin:$PATH
+
+

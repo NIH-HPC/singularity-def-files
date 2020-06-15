@@ -1,0 +1,27 @@
+BootStrap: docker
+From: centos:centos6
+
+%post
+    yum -y install gnuplot netpbm-progs tcsh wget glibc.i686
+    cd /tmp
+    wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+    rpm -ivh epel-release-6-8.noarch.rpm
+    yum -y install gv
+    # needed to copy in netOglyc-3.1d.Linux.tar.Z from private location
+    # needed to copy in signalp-3.0.Linux.tar.Z from private location
+    cd /opt
+    tar xzf /tmp/netOglyc-3.1d.Linux.tar.Z
+    tar xzf /tmp/signalp-3.0.Linux.tar.Z
+    ln -s /usr/bin/gawk /usr/bin/nawk
+    sed -i 's#/usr/cbs/packages/netOglyc/3.1/netOglyc-3.1d#/opt/netOglyc-3.1d#g' /opt/netOglyc-3.1d/netOglyc
+    sed -i 's#/usr/cbs/bio/bin/signalp#/opt/signalp-3.0/signalp#g' /opt/netOglyc-3.1d/netOglyc
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export PATH=/opt/netOglyc-3.1d:/opt/signalp-3.0:$PATH
+

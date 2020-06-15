@@ -1,0 +1,61 @@
+Bootstrap: docker
+From: nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export CUDA_HOME=/usr/local/cuda-9.0
+
+export LD_LIBRARY_PATH=/anaconda/plugins/xcbglintegrations:/anaconda/pkgs/libxcb-1.12-h84ff03f_3/lib:/anaconda/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:/anaconda/plugins/platforms:/anaconda/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:$LD_LIBRARY_PATH
+
+export PYTHONPATH=$LD_LIBRARY_PATH:/DEXTR-PyTorch:/anaconda/lib/python3.6:/anaconda/lib/python3.6/site-packages:/visdom/lib/python3.6/site-packages:$PYTHONPATH
+
+export PATH=/anaconda/bin:/bin:/usr/bin:/usr/local/cuda-9.0/bin:$PATH
+export PATH=${CUDA_HOME}/bin:${PATH}
+
+######################################################################
+%post
+######################################################################
+apt-get -y update && apt-get install -y --no-install-recommends \
+    bzip2 \
+    vim \
+    git \
+    wget \
+    libx11-dev \
+    libgl1-mesa-glx \
+    libgl1-mesa-dev \
+    build-essential \
+    python-opencv
+apt-get install -y libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
+apt-get install -y libxcb1-dev libx11-xcb-dev libxcb-glx0-dev
+apt-get install -y libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev
+    
+export LD_LIBRARY_PATH=/anaconda/plugins/xcbglintegrations:/anaconda/pkgs/libxcb-1.12-h84ff03f_3/lib:/anaconda/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:/anaconda/plugins/platforms:/anaconda/lib:$LD_LIBRARY_PATH
+
+export PYTHONPATH=$LD_LIBRARY_PATH:/Pytorch-UNet:/anaconda/lib/python3.6:/anaconda/lib/python3.6/site-packages:/visdom/lib/python3.6/site-packages:$PYTHONPATH
+
+export PATH=/anaconda/bin:/bin:/usr/bin:$PATH
+
+wget --no-check-certificate https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
+bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /anaconda && \
+rm Anaconda3-5.0.1-Linux-x86_64.sh
+
+conda install -c kmdouglass tifffile 
+conda install python=3.6 numpy scipy scikit-learn scikit-image pillow 
+conda install -c auto msgpack-python
+conda install matplotlib
+conda install --channel https://conda.anaconda.org/menpo opencv3
+conda install pytorch torchvision cuda90 -c pytorch
+conda install -c conda-forge tensorboard tensorboardx
+
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch 
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

@@ -1,0 +1,34 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://archive.ubuntu.com/ubuntu/
+
+%post
+  sed -i 's/main/main restricted universe/g' /etc/apt/sources.list
+  apt-get update
+
+  # Install R plus others
+  apt-get install -y libopenblas-dev r-base-core libcurl4-openssl-dev libopenmpi-dev openmpi-bin openmpi-common openmpi-doc openssh-client openssh-server libssh-dev wget vim git nano git cmake  gfortran g++ curl wget autoconf bzip2 libtool libtool-bin default-jre
+  apt-get clean
+  locale-gen en_US.UTF-8
+
+# Install required R packages
+  R --slave -e 'install.packages("bio3d", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("stringr", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("Interpol", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("zoo", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("bitops", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("RCurl", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("jsonlite", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("statmod", repos="http://archive.linux.duke.edu/cran/")'
+  R --slave -e 'install.packages("jsonlite", repos="http://archive.linux.duke.edu/cran/")'
+  cd /tmp
+  wget https://cran.r-project.org/src/contrib/Archive/h2o/h2o_3.10.0.8.tar.gz
+  R CMD INSTALL h2o_3.10.0.8.tar.gz
+  rm h2o_3.10.0.8.tar.gz
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12 13 14 15 16; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+

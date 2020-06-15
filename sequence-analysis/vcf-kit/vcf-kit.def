@@ -1,0 +1,76 @@
+Bootstrap: docker
+From: ubuntu:16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+################################################################################
+%environment
+################################################################################
+export PATH=/bin:/usr/bin:/usr/local/bin
+################################################################################
+%environment
+################################################################################
+export PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/cuda/bin:/miniconda2/bin:$PATH
+export LD_LIBRARY_PATH=/miniconda2/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=/miniconda2/lib/python2.7/site-packages:$PYTHONPATH
+
+################################################################################
+%post
+################################################################################
+
+apt-get update
+apt-get build-dep -y python-matplotlib
+apt-get install -y wget vim git curl locales python-dev python-pip
+
+cd /tmp
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh -b -f -p /miniconda2
+rm Miniconda2-latest-Linux-x86_64.sh
+export PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/cuda/bin:/miniconda2/bin:$PATH
+export LD_LIBRARY_PATH=/miniconda2/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=/miniconda2/lib/python2.7/site-packages:$PYTHONPATH
+
+#
+# Install dependencies
+#
+conda install -c anaconda setuptools
+conda install -c conda-forge awesome-slugify
+conda install -c conda-forge matplotlib 
+conda install -c conda-forge scipy
+conda install -c conda-forge numpy
+conda install -c anaconda cython==0.24.1
+conda install -c bioconda cyvcf2==0.6.5
+conda install -c anaconda docopt 
+conda install -c anaconda biopython
+conda install -c bioconda yahmm
+conda install -c conda-forge clint
+conda install -c anaconda requests
+conda install -c anaconda networkx==1.11
+conda install -c conda-forge intervaltree==2.1.0
+conda install -c conda-forge tabulate
+conda install -c anaconda jinja2
+
+#
+# Install the tools that will be used by VCF-kit
+#
+conda install -c bioconda samtools==1.3
+conda install -c bioconda bwa==0.7.12
+conda install -c bioconda bcftools==1.3
+conda install -c bioconda blast==2.2.31
+conda install -c bioconda muscle==3.8.31
+
+# 
+# Install VCF-kit
+#
+conda install -c bioconda vcfkit
+
+###
+### Destination for NIH HPC bind mounts
+###
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

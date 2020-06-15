@@ -1,0 +1,75 @@
+Bootstrap: docker
+From: nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+
+################################################################################
+%labels
+################################################################################
+MAINTAINER Gennady Denisov
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export CUDA_HOME=/usr/local/cuda-9.0
+
+export LD_LIBRARY_PATH=/anaconda/plugins/xcbglintegrations:/anaconda/pkgs/libxcb-1.12-h84ff03f_3/lib:/anaconda/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:/anaconda/plugins/platforms:/anaconda/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:$LD_LIBRARY_PATH
+
+export PYTHONPATH=$LD_LIBRARY_PATH:/Pytorch-UNet:/pydensecrf:/anaconda/lib/python3.5:/anaconda/lib/python3.5/site-packages:/visdom/lib/python3.5/site-packages:$PYTHONPATH
+
+export PATH=/anaconda/bin:/bin:/usr/bin:/usr/local/cuda-9.0/bin:$PATH
+export PATH=${CUDA_HOME}/bin:${PATH}
+
+################################################################################
+%files
+################################################################################
+unet_mod/my_code.tar  tmp/my_code_gpu.tar
+
+######################################################################
+%post
+######################################################################
+cd /
+mv /tmp/my_code_gpu.tar .
+tar -xvf my_code_gpu.tar
+rm -f my_code_gpu.tar
+mv my_code Pytorch-UNet
+
+apt-get -y update && apt-get install -y --no-install-recommends \
+    bzip2 \
+    vim \
+    git \
+    wget \
+    libx11-dev \
+    libgl1-mesa-glx \
+    libgl1-mesa-dev \
+    build-essential \
+    python-opencv
+apt-get install -y libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
+apt-get install -y libxcb1-dev libx11-xcb-dev libxcb-glx0-dev
+apt-get install -y libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev
+    
+wget --no-check-certificate https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
+bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /anaconda && \
+rm Anaconda3-5.0.1-Linux-x86_64.sh
+
+export LD_LIBRARY_PATH=/anaconda/plugins/xcbglintegrations:/anaconda/pkgs/libxcb-1.12-h84ff03f_3/lib:/anaconda/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/mesa:/anaconda/plugins/platforms:/anaconda/lib:$LD_LIBRARY_PATH
+
+export PYTHONPATH=$LD_LIBRARY_PATH:/Pytorch-UNet:/anaconda/lib/python3.5:/anaconda/lib/python3.5/site-packages:/visdom/lib/python3.5/site-packages:$PYTHONPATH
+
+export PATH=/anaconda/bin:/bin:/usr/bin:$PATH
+
+conda install -c kmdouglass tifffile 
+conda install python=3.5 numpy=1.13.3 scipy==1.0.0 scikit-learn=0.19.1 anaconda-client 
+conda install -c anaconda pip
+conda install -c auto msgpack-python
+pip install setuptools wheel cython
+pip install pydensecrf
+conda install ipython scikit-image=0.13.1 matplotlib=2.1.1 
+conda install --channel https://conda.anaconda.org/menpo opencv3
+# see http://pytorch.org/previous-versions/
+conda install pytorch torchvision cuda90 -c pytorch
+
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch 
+for i in $(seq 2 12); do ln -s /gpfs/gsfs$i /gs$i; done
+
+

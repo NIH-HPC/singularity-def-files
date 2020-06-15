@@ -1,0 +1,110 @@
+BootStrap: docker
+From: debian:testing-slim
+
+# if not testing version will be old
+
+#---------------------------------------------------------------------
+%post
+#---------------------------------------------------------------------
+apt-get -y update
+apt-get install -y curl wget nano
+apt-get install -y roary #refreshing
+
+# there is an issue with the R script that create plots
+cd /
+patch -p0 <<'__END_OF_PATCH__'
+--- /usr/bin/create_pan_genome_plots	2018-05-06 15:27:53.320798891 +0000
++++ /usr/bin/create_pan_genome_plots	2018-05-06 15:32:10.879430698 +0000
+@@ -6,24 +6,33 @@
+ 
+ 
+ mydata = read.table("number_of_new_genes.Rtab")
++png("number_of_new_genes.png", width=480*3, height=480*3, res=205)
+ boxplot(mydata, data=mydata, main="Number of new genes",
+          xlab="No. of genomes", ylab="No. of genes",varwidth=TRUE, ylim=c(0,max(mydata)), outline=FALSE)
++dev.off()
+ 
+ mydata = read.table("number_of_conserved_genes.Rtab")
++png("number_of_conserved_genes.png", width=480*3, height=480*3, res=205)
+ boxplot(mydata, data=mydata, main="Number of conserved genes",
+           xlab="No. of genomes", ylab="No. of genes",varwidth=TRUE, ylim=c(0,max(mydata)), outline=FALSE)
+- 
++dev.off()
++
+ mydata = read.table("number_of_genes_in_pan_genome.Rtab")
++png("number_of_genes_in_pan_genome.png", width=480*3, height=480*3, res=205)
+ boxplot(mydata, data=mydata, main="No. of genes in the pan-genome",
+           xlab="No. of genomes", ylab="No. of genes",varwidth=TRUE, ylim=c(0,max(mydata)), outline=FALSE)
++dev.off()
+ 
+ mydata = read.table("number_of_unique_genes.Rtab")
++png("number_of_unique_genes.png", width=480*3, height=480*3, res=205)
+ boxplot(mydata, data=mydata, main="Number of unique genes",
+          xlab="No. of genomes", ylab="No. of genes",varwidth=TRUE, ylim=c(0,max(mydata)), outline=FALSE)
++dev.off()
+ 
+ mydata = read.table("blast_identity_frequency.Rtab")
++png("blast_identity_frequency.png", width=480*3, height=480*3, res=205)
+ plot(mydata,main="Number of blastp hits with different percentage identity",  xlab="Blast percentage identity", ylab="No. blast results")
+-
++dev.off()
+ 
+ library(ggplot2)
+ conserved = colMeans(read.table("number_of_conserved_genes.Rtab"))
+@@ -58,30 +67,3 @@
+ ylab("No. of genes")+ theme_bw(base_size = 16) +  theme(legend.justification=c(1,1),legend.position=c(1,1))+
+ ggsave(filename="unique_vs_new_genes.png", scale=1)
+ 
+-__END__
+-
+-=pod
+-
+-=encoding UTF-8
+-
+-=head1 NAME
+-
+-create_plots.R - Create R plots
+-
+-=head1 VERSION
+-
+-version 3.12.0
+-
+-=head1 AUTHOR
+-
+-Andrew J. Page <ap13@sanger.ac.uk>
+-
+-=head1 COPYRIGHT AND LICENSE
+-
+-This software is Copyright (c) 2013 by Wellcome Trust Sanger Institute.
+-
+-This is free software, licensed under:
+-
+-  The GNU General Public License, Version 3, June 2007
+-
+-=cut
+__END_OF_PATCH__
+
+# it does not automatically install ggplot
+R --vanilla -e 'install.packages("ggplot2", lib="/usr/lib/R/library", repos=c("http://cloud.r-project.org/"))'
+
+# create bind points for NIH HPC environment
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+# clean up
+apt-get clean
+
+#---------------------------------------------------------------------
+%runscript
+#---------------------------------------------------------------------
+printf "This container encapsulates the Roary pipeline\n"
+printf "for rapid large scale prokaryote speed pan genome analysis.\n"
+printf "\n\nroary: %s\n" "$(roary --version)"
+
+#---------------------------------------------------------------------
+%environment
+#---------------------------------------------------------------------
+export LANG=C
+export R_SITE_LIBS=/usr/lib/R/site-library:/usr/local/lib/R/site-library
+
+

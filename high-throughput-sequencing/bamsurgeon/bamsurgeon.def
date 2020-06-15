@@ -1,0 +1,136 @@
+Bootstrap: library
+From: library://library/default/ubuntu:sha256.80c52afadf3e7c3f9573de4fe79b7dca57fb3290df6c8dc46a75b02768a81146
+
+%post
+    # add universe repos
+    echo "deb http://archive.ubuntu.com/ubuntu bionic main universe" >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-security main universe" >>/etc/apt/sources.list
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-updates main universe" >>/etc/apt/sources.list
+
+    # basic deps from repos
+    apt update
+    apt install -y python build-essential python-pip git zlib1g-dev \
+        libbz2-dev liblzma-dev libcurl4-openssl-dev libncurses5-dev wget unzip \
+        dh-autoreconf pkg-config libglib2.0-dev openjdk-11-jdk libtbb-dev 
+
+    # omics deps
+    mkdir /build
+    cd /build
+    BINDIR=/usr/local/bin
+
+    git clone https://github.com/samtools/htslib.git
+    cd htslib && git checkout 1.9 && cd ..
+    make -C htslib
+    make -C htslib install
+
+    git clone https://github.com/samtools/samtools.git
+    cd samtools && git checkout 1.9 && cd ..
+    make -C samtools
+    cp samtools/samtools $BINDIR
+    cp samtools/misc/wgsim $BINDIR
+
+    git clone https://github.com/samtools/bcftools.git
+    cd bcftools && git checkout 1.9 && cd ..
+    make -C bcftools
+    cp bcftools/bcftools $BINDIR
+
+    git clone https://github.com/lh3/bwa.git
+    cd bwa && git checkout v0.7.17 && cd ..
+    make -C bwa
+    cp bwa/bwa $BINDIR
+    
+    wget https://github.com/broadinstitute/picard/releases/download/1.131/picard-tools-1.131.zip
+    unzip picard-tools-1.131.zip
+    cp -r ./picard-tools-1.131 /opt/
+
+    git clone https://github.com/adamewing/exonerate.git
+    cd exonerate && git checkout 09b5f81 && cd ..
+    cd exonerate
+    git checkout v2.4.0
+    autoreconf -i
+    ./configure && make && make check && make install
+
+    wget https://www.ebi.ac.uk/~zerbino/velvet/velvet_1.2.10.tgz
+    tar xvzf velvet_1.2.10.tgz
+    make -C velvet_1.2.10
+    cp velvet_1.2.10/velvetg $BINDIR
+    cp velvet_1.2.10/velveth $BINDIR
+
+    pip install cython==0.29.13
+    pip install pysam==0.15.3
+
+    # bamsurgeon itself
+    git clone https://github.com/adamewing/bamsurgeon.git
+    cd bamsurgeon && git checkout 1111e5d
+    python setup.py build
+    python setup.py install
+
+    # nice to haves
+    wget https://repo.anaconda.com/archive/Anaconda2-2019.10-Linux-x86_64.sh
+    bash Anaconda2-2019.10-Linux-x86_64.sh -b -p /opt/miniconda
+    export PATH=/opt/miniconda/bin:$PATH
+    conda install -c bioconda/label/cf201901 novoalign
+
+    wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2019-09-12.tar.gz
+    tar xvf gmap-gsnap-2019-09-12.tar.gz 
+    cd gmap-2019-09-12/
+    ./configure --prefix=/usr/local
+    make && make install
+    cd ..
+
+    git clone https://github.com/alexdobin/STAR.git
+    cd STAR/source
+    git checkout 2.7.3a
+    make STAR
+    cp STAR $BINDIR
+    cd ../..
+
+    wget https://downloads.sourceforge.net/project/bowtie-bio/bowtie2/2.3.5.1/bowtie2-2.3.5.1-source.zip
+    unzip bowtie2-2.3.5.1-source.zip 
+    cd bowtie2-2.3.5.1/
+    make 
+    cp bowtie2 $BINDIR
+    cp bowtie2-align-l $BINDIR
+    cp bowtie2-align-s $BINDIR
+    cp bowtie2-build $BINDIR
+    cp bowtie2-build-l $BINDIR
+    cp bowtie2-build-s $BINDIR
+    cp bowtie2-inspect $BINDIR
+    cp bowtie2-inspect-l $BINDIR
+    cp bowtie2-inspect-s $BINDIR
+    cd ..
+
+    wget http://github.com/iontorrent/TMAP/tarball/tmap.0.3.7
+    tar xvf tmap.0.3.7
+    cd iontorrent-TMAP-9252356/
+    sh autogen.sh
+    ./configure --prefix /usr/local
+    make && make install
+    cd ..
+
+    wget https://downloads.sourceforge.net/project/bio-bwa/bwakit/bwakit-0.7.15_x64-linux.tar.bz2
+    tar -C /opt/ -xvf bwakit-0.7.15_x64-linux.tar.bz2 
+
+    wget https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17_x64-linux.tar.bz2
+    tar xvf minimap2-2.17_x64-linux.tar.bz2 
+    cd minimap2-2.17_x64-linux/
+    cp k8 $BINDIR
+    cp minimap2 $BINDIR
+    cp paftools.js $BINDIR
+    cd ..
+            
+    cd /
+    rm -rf /build
+    apt purge -y build-essential python3-pip git dh-autoreconf pkg-config 
+    apt clean
+
+    # Create symbolic links for the NIH HPC systems
+    for i in $(seq 1 30)
+    do
+        ln -s /gpfs/gsfs$i /gs$i
+    done
+
+%environment
+    export BAMSURGEON_PICARD_JAR=/opt/picard-tools-1.131/picard.jar
+    export PATH=/opt/miniconda/bin:$PATH:/opt/bwa.kit
+

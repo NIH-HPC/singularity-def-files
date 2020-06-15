@@ -1,0 +1,52 @@
+Bootstrap: docker
+From: library/centos:7.4.1708
+
+%post
+    # basic deps
+    yum -y install epel-release
+    yum -y install bzip2-devel cmake cmake3 git libcurl-devel openssl-devel R \
+        vim wget libxml2-devel
+
+    # pandoc and bamtools
+    cd /tmp
+    wget https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-linux.tar.gz
+    tar xvzf pandoc-2.1.3-linux.tar.gz --strip-components 1 -C /usr/local/
+    git clone git://github.com/pezmaster31/bamtools.git
+    mkdir bamtools/build
+    cd bamtools/build
+    cmake3 .. && make && make install
+
+    # boost
+    mkdir /opt/boost
+    wget http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.gz
+    tar -xvzf boost_1_60_0.tar.gz
+    cd boost_1_60_0
+    ./bootstrap.sh --with-libraries=filesystem,iostreams,log,system,thread,test && \
+    ./b2 cxxflags=-std=c++11 link=shared threading=multi install --prefix=/opt/boost
+
+    # R (need some libs in dropEst directory?)
+    export LC_ALL=C
+    mkdir -pv /usr/share/doc/R-3.6.0/html/
+    cd /opt
+    git clone https://github.com/hms-dbmi/dropest.git
+    cd dropest && git checkout v0.8.6 && cd ..
+    R -e 'chooseCRANmirror(ind=52); install.packages(c("devtools", "RcppProgress", "Rcpp","RcppEigen", "RInside", "Matrix", "optparse", "rmarkdown", "tidyselect", "multicool", "FNN", "mvtnorm", "pcaPP", "kernlab", "plogr", "ks", "polynom", "preseqR"))'
+    R -e 'devtools::install_local("/opt/dropEst/dropestr/", dependencies=T)'
+    R -e 'chooseCRANmirror(ind=52); install.packages("ks", dependencies=c("Depends", "Imports", "LinkingTo"))'
+
+    # dropEst
+    mkdir dropest/build
+    cd dropest/build
+    cmake -D BOOST_ROOT=/opt/boost .. && \
+    make
+
+    # make nih hpc specific links
+    mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export PATH=/opt/dropest/build:$PATH
+    export LC_ALL=C
+

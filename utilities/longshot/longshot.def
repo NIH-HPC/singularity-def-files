@@ -1,0 +1,9 @@
+Bootstrap: docker
+From: quay.io/biocontainers/longshot:v0.3.5--h80880c6_0
+  
+%post
+for i in $(seq 1 30)
+do 
+    ln -s /gpfs/gsfs$i /gs$i 
+done
+

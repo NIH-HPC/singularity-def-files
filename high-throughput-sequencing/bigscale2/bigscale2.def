@@ -1,0 +1,39 @@
+BootStrap: docker
+From: ubuntu:latest
+
+######################################################################
+%post
+######################################################################
+# Install dependencies
+apt-get  update && apt-get install -y --no-install-recommends apt-transport-https curl ca-certificates
+apt-get -y install wget vim git unzip libssl-dev libcurl4-openssl-dev zlib1g-dev libv8-dev
+apt-get -y install libgsl-dev libxml2-dev gnupg gnupg1 gnupg2
+
+export DEBIAN_FRONTEND=noninteractive
+#install tzdata package
+apt-get install -y tzdata
+# set your timezone
+ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+dpkg-reconfigure --frontend noninteractive tzdata
+
+apt -y install software-properties-common
+apt-get update
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 
+add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
+apt -o Acquire::AllowInsecureRepositories=true update
+apt --allow-unauthenticated -y install r-base r-cran-littler
+
+#  Install required R libraries.
+R --slave -e 'install.packages("xml2", repos = "http://cloud.r-project.org/", dependencies = TRUE)'
+R --slave -e 'install.packages("rvest", repos = "http://cloud.r-project.org/", dependencies = TRUE)'
+R --slave -e 'install.packages("devtools", repos = "http://cloud.r-project.org/", dependencies = TRUE)'
+R --slave -e 'install.packages("BiocManager", repos = "http://cloud.r-project.org/", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("Biobase", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("AnnotationDbi", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("BioQC", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("SummarizedExperiment", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("org.Hs.eg.db", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("org.Mm.eg.db", dependencies = TRUE)'
+R --slave -e 'BiocManager::install("SingleCellExperiment", dependencies = TRUE)'
+R --slave -e 'devtools::install_github("iaconogi/bigSCale2", dependencies = TRUE)'
+

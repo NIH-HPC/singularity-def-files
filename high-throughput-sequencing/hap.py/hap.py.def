@@ -1,0 +1,25 @@
+Bootstrap: docker
+From: pkrusche/hap.py:v0.3.9
+
+#----
+%post
+#----
+
+# Create mount points and links to match our systems
+mkdir \
+  /scratch \
+  /lscratch \
+  /spin1 \
+  /fdb \
+  /gpfs \
+  /data
+for i in $(seq 1 30) # anticipate more GPFS directories than currently exist
+do
+  ln -s /gpfs/gsfs$i /gs$i
+done
+
+%environment
+export LC_ALL=C
+export PATH=$PATH:/opt/hap.py/bin
+
+

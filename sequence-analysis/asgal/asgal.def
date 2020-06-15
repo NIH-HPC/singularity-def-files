@@ -1,0 +1,32 @@
+Bootstrap: library
+From: ubuntu:18.04
+%post
+apt-get install -y software-properties-common
+add-apt-repository universe
+apt-get update
+apt-get install -y git
+apt-get install -y gcc
+apt-get install -y g++
+apt-get install -y cmake
+apt-get install -y build-essential git python3 
+apt-get install -y python3-pip python3-setuptools python3-biopython python3-biopython-sql python3-pysam cmake libboost1.65-all-dev samtools unzip wget curl zlib1g-dev liblzma-dev libjemalloc-dev libjemalloc1 libghc-bzlib-dev
+pip3 install gffutils
+
+git clone --recursive https://github.com/AlgoLab/galig.git
+cd galig
+make prerequisites
+make
+
+ln -s /galig/asgal /usr/local/bin/
+ln -s /galig/bin/* /usr/local/bin/
+ln -s /galig/salmon/bin/* /usr/local/bin
+
+# Create symbolic links for the NIH HPC systems
+for i in $(seq 1 30)
+do
+ln -s /gpfs/gsfs$i /gs$i
+done
+
+%environment
+export LD_LIBRARY_PATH=/galig/salmon/lib:$LD_LIBRARY_PATH
+

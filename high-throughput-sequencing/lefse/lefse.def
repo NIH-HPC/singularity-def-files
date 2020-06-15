@@ -1,0 +1,38 @@
+BootStrap: docker
+From: continuumio/miniconda:4.4.10
+
+################################################################################
+%post
+################################################################################
+
+export LC_ALL=C
+. /opt/conda/etc/profile.d/conda.sh
+conda update --yes --all
+
+# create the lefse environment
+conda update --all --yes
+conda activate base
+conda create -n lefse --yes
+conda activate lefse
+conda config --env --append channels bioconda
+conda config --env --append channels conda-forge
+conda install --yes lefse=1.0.7
+conda clean --yes --all
+
+# create the biowulf specific directories for binding file systems
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 20); do 
+    ln -s /gpfs/gsfs$i /gs$i
+done
+
+# set up the environment for the container
+
+################################################################################
+%environment
+################################################################################
+export SINGULARITY_INIT=1
+PATH="/opt/conda/envs/lefse/bin:/bin:/usr/bin:/usr/local/bin"
+export PS1="Singularity.$SINGULARITY_CONTAINER> $PS1"
+export LC_ALL=C
+
+

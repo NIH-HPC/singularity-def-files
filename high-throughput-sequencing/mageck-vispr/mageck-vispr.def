@@ -1,0 +1,38 @@
+BootStrap: docker
+From: debian:stretch-slim
+
+#---------------------------------------------------------------------
+%post
+#---------------------------------------------------------------------
+APP=mageck-vispr
+
+apt-get -y update
+apt-get install -y curl wget nano bzip2 libfindbin-libs-perl
+
+# miniconda
+mkdir -p /opt
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+. /opt/conda/etc/profile.d/conda.sh
+conda activate base
+conda update --yes --all
+conda create -n mageck-vispr
+conda activate mageck-vispr
+conda config --env --add channels bioconda
+conda config --env --add channels r
+conda install mageck-vispr pandas==0.19.2
+
+# create bind points for NIH HPC environment
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+# clean up
+apt-get clean
+conda clean --yes --all
+
+#---------------------------------------------------------------------
+%environment
+#---------------------------------------------------------------------
+export LC_ALL=C
+export PATH=/opt/conda/envs/mageck-vispr/bin:$PATH
+

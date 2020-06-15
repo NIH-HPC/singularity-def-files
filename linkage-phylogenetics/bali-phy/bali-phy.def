@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: ubuntu:19.10
+
+%labels
+	MAINTAINER:Qi Yu
+
+%post
+	# Install prerequired tools
+	apt-get update
+	apt-get -y install g++ libcairo2-dev python3 python3-pip ninja-build git
+	
+	# Install compiling tool
+	pip3 install meson
+	
+	# Download source code and Build 
+	git clone https://github.com/bredelings/BAli-Phy.git
+	cd BAli-Phy
+	meson build --prefix=/usr/local --buildtype=release
+	ninja -C build install
+	ninja -C build test
+
+	# Create links for NIH HPC
+	mkdir /gpfs /spin1 /data /scratch /fdb /lscratch
+	for i in $(seq 1 30); do ln -s /gpfs/gsfs$i /gs$i; done
+
+
+
