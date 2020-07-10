@@ -1,0 +1,36 @@
+Bootstrap: library
+From: nitishnarula/secure/ubuntu-focal
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    rm -rf  /root/.singularity/cache/library
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=53CA588B89E900EC0ED0CF446E20C9F0BAE45D7F
+    MESSG="Data integrity verified"
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+        grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+        grep -q "$MESSG"
+
+%runscript
+    echo "Singularity container for tesseract-ocr"
+
+%post
+    apt-get -y update
+    apt-get install -y curl wget nano bzip2 less
+    apt-get clean
+
+    apt-get install -y libleptonica-dev tesseract-ocr libtesseract-dev 
+    apt-get clean
+
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C
+

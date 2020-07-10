@@ -1,0 +1,20 @@
+Bootstrap: docker
+From: suluxan/bamgineer-v2
+
+%runscript
+    echo "singularity container for bamgineer-v2 (built 20200624)"
+
+%post
+    mkdir -p /opt/bamgineer/
+    cd /opt/bamgineer/
+    ln -s /bamgineer/src/ bin
+    
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export PATH=/opt/bamgineer/bin/:$PATH
+

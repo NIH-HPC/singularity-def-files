@@ -10,7 +10,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     apt-get clean
 
     cd /opt
-    # needed to copy in terastitcher from private location
+    # need to copy in terastitcher from GitHub
     chmod a+rx terastitcher
 
 # Set the bindpaths

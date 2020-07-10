@@ -1,0 +1,69 @@
+Bootstrap: library
+From: ubuntu:sha256.80c52afadf3e7c3f9573de4fe79b7dca57fb3290df6c8dc46a75b02768a81146
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%post
+    apt-get update
+    apt-get install -y software-properties-common 
+    apt-get update
+    add-apt-repository universe
+    apt-get update
+    apt-get install -y git wget build-essential libopenblas-base \
+        libopenblas-dev libidn11
+
+    # install miniconda
+    cd /tmp
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -p /opt/conda -b
+    rm Miniconda3-latest-Linux-x86_64.sh
+    . /opt/conda/etc/profile.d/conda.sh
+
+    # download repo
+    cd /opt
+    git clone https://github.com/Yyx2626/HTGTSrep.git
+    cd HTGTSrep/HTGTSrep 
+    git checkout 9fe74ff # latest commit as of today :-/
+    conda env create environment.yml 
+    conda activate HTGTSrep
+    chmod 755 HTGTSrep.py
+
+    # get igblast
+    cd /tmp
+    wget ftp://ftp.ncbi.nih.gov/blast/executables/igblast/release/1.5.0/ncbi-igblast-1.5.0-x64-linux.tar.gz
+    tar -C /opt -xzf ncbi-igblast-1.5.0-x64-linux.tar.gz 
+    rm ncbi-igblast-1.5.0-x64-linux.tar.gz
+    cd /opt
+    ln -s ncbi-igblast-1.5.0/ igblast
+    export PATH=/opt/igblast/bin:$PATH
+
+    # conda extras
+    conda install -y -c conda-forge biopython
+
+    # R and R extras
+    apt-key adv --keyserver keyserver.ubuntu.com \
+        --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    add-apt-repository \
+        'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
+    apt-get update
+    apt-get install -y r-base
+    cat >/tmp/r_install<<EOR
+setRepositories(false, ind=c(1, 5))
+install.packages(c("alakazam", "RColorBrewer", "BiocManager"))
+BiocManager::install("Biostrings", update=TRUE, ask=FALSE)
+EOR
+    Rscript /tmp/r_install
+
+    # make nih hpc specific links
+    mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate HTGTSrep
+    export PATH=/opt/HTGTSrep/HTGTSrep:/opt/igblast/bin:$PATH
+    export LC_ALL=C
+

@@ -3,8 +3,10 @@
 This is a very broad category of applications that are not strictly science related. It includes things like editors, file utilities, web browsers, etc.  
 
 ## [Utilities](/utilities)
+- [Xvfb](/utilities/xvfb)
 - [ariba](/utilities/ariba)
 - [atom](/utilities/atom)
+- [gdc-client](/utilities/gdc-client)
 - [longshot](/utilities/longshot)
 - [pdf2svg](/utilities/pdf2svg)
 - [snp-sites](/utilities/snp-sites)

@@ -1,0 +1,42 @@
+BootStrap: docker
+From: debian:buster-slim
+
+%post
+   
+   # install dependencies
+   apt-get -y update
+   apt-get install -y curl wget nano bzip2 less git
+   apt-get install -y libgl1-mesa-glx libgl1-mesa-dev freeglut3 libx11-dev libxtst6 libfontconfig libdbus-1-3 mesa-utils
+   
+
+   # install Qt
+   cd / && mkdir Qt
+   wget http://download.qt.io/official_releases/qt/5.9/5.9.0/qt-opensource-linux-x64-5.9.0.run
+   git clone https://github.com/benlau/qtci
+   qtci/bin/extract-qt-installer qt-opensource-linux-x64-5.9.0.run /Qt
+   rm -rf qtci qt-opensource-linux-x64-5.9.0.run
+
+   # install mrtrix
+   mkdir -p /opt
+   wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+   bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+   . /opt/conda/etc/profile.d/conda.sh
+   conda activate base
+   conda update --yes --all
+   conda create -n mrtrix
+   conda activate mrtrix
+   conda install --yes -c mrtrix3 mrtrix3
+
+   # create bind points for NIH HPC environment
+   mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+   for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+   # clean up
+   apt-get clean
+   conda clean --yes --all
+
+%environment
+   export LC_ALL=C
+   export PATH=/opt/conda/envs/mrtrix/bin:$PATH
+   export LD_LIBRARY_PATH=/lib64:$LD_LIBRARY_PATH
+

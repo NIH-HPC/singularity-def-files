@@ -13,20 +13,11 @@ From: debian:stretch
 
 # Install ResMap
     mkdir /opt/resmap && cd /opt/resmap
-    # needed to copy in release_ResMap_Linux-cuda-v1.95_04Jun18_0958.tar.gz 
+    # need to copy in release_ResMap_Linux-cuda-v1.95_04Jun18_0958.tar.gz from Source Forge
     tar xzf release_ResMap_Linux-cuda-v1.95_04Jun18_0958.tar.gz
     find /opt -perm /u+r -exec chmod a+r {} \;
     find /opt -perm /u+x -exec chmod a+x {} \;
     ln -s ResMap-1.95-cuda9.0-Linux17.04x64 ResMap
-
-## Install Python and friends
-#    cd /opt
-#    curl -o miniconda3.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-#    bash miniconda3.sh -p $(pwd)/anaconda -f -b
-#    rm miniconda3.sh
-#    . $(pwd)/anaconda/etc/profile.d/conda.sh
-#    conda activate
-#    conda create -n py3.5 -y python=3.5.3 numpy scipy matplotlib tk
 
 # Set the bindpaths
     mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps /usr/local/CUDA

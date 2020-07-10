@@ -1,0 +1,34 @@
+BootStrap: docker
+From: debian:buster-slim
+
+%post
+	apt-get -y update
+	apt-get install -y curl wget nano bzip2 less
+
+	# miniconda
+	mkdir -p /opt
+	wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+	bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+	. /opt/conda/etc/profile.d/conda.sh
+	conda activate base
+	conda update --yes --all
+	conda create -n app python=3.6
+	conda activate app
+	conda config --env --add channels conda-forge
+	conda config --env --add channels bioconda
+	conda install --yes tensorflow-gpu==1.14.0
+	conda install --yes medaka==0.12.1
+
+
+	# create bind points for NIH HPC environment
+	mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+	for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+	# clean up
+	apt-get clean
+	conda clean --yes --all
+
+%environment
+	export LC_ALL=C
+	export PATH=/opt/conda/envs/app/bin:$PATH
+

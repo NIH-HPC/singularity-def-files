@@ -91,7 +91,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
 
 # Compile GeneSplicer
     cd /opt
-    wget ftp://ccb.jhu.edu/pub/software/genesplicer/GeneSplicer.tar.gz
+    wget ftp://ftp.ccb.jhu.edu/pub/software/genesplicer/GeneSplicer.tar.gz
     tar xzf GeneSplicer.tar.gz
     chown -R root.root GeneSplicer
     find GeneSplicer -type f -exec chmod a+r {} +

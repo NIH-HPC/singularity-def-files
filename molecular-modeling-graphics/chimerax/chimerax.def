@@ -1,0 +1,18 @@
+BootStrap: docker
+From: library/ubuntu:18.04
+
+%post
+    apt-get update
+    apt-get upgrade -y
+    apt-get install -y libxkbcommon-x11-0
+    apt-get install -y /tmp/downloads/Ubuntu_18.04/ucsf-chimerax_0.93_amd64.deb
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12 13 14 15 16; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export PATH=$PATH:/usr/lib/ucsf-chimerax/bin
+
