@@ -1,6 +1,2 @@
 # [xHLA](https://hpc.nih.gov/apps/xHLA.html)
-
-Create the following symbolic links:
-```
-xhla -> wrapper.sh
-```
+- [2018-04-04](/sequence-analysis/xhla/2018-04-04)

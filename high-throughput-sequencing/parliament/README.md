@@ -1,6 +1,2 @@
 # [parliament](https://github.com/dnanexus/parliament2)
-
-Create the following symbolic links:
-```
-parliament2.py -> wrap
-```
+- [0.1.7](/high-throughput-sequencing/parliament/0.1.7)

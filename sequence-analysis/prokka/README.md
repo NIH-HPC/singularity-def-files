@@ -1,4 +1,3 @@
 # [prokka](https://hpc.nih.gov/apps/prokka.html)
-
-This app just uses the the wrapper script as the executable without any symlinks.
-
+- [1.14.6](/sequence-analysis/prokka/1.14.6)
+- [1.13](/sequence-analysis/prokka/1.13)

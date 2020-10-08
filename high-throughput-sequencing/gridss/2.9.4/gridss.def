@@ -1,0 +1,22 @@
+Bootstrap: docker
+From: gridss/gridss:2.9.4
+ 
+%labels
+   MAINTAINER Antonio Ulloa
+ 
+%post
+   # create directory specific to NIH HPC
+   mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+   # create symbolic links for the NIH HPC systems
+   for i in $(seq 1 30)
+   do 
+      ln -s /gpfs/gsfs${i} /gs${i} 
+   done
+   # get rid of extraneous carraige return in original script
+   sed -i "1s|#!.*|#! /usr/bin/Rscript|" /opt/gridss/gridss_somatic_filter.R
+%environment
+   export LC_ALL=C
+   export PATH=/opt/gridss:${PATH}
+   export LD_LIBRARY_PATH=/lib64:${LD_LIBRARY_PATH}
+
+

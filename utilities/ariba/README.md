@@ -1,7 +1,2 @@
 # [ariba](https://hpc.nih.gov/apps/ariba.html)
-
-Create the following symbolic links:
-```
-ariba -> wrapper.sh
-
-```
+- [2.14.4](/utilities/ariba/2.14.4)

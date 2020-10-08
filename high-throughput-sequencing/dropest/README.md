@@ -1,8 +1,2 @@
 # [dropest](https://github.com/hms-dbmi/dropEst)
-
-Create the following symbolic links:
-```
-dropest -> dropest.sh
-droptag -> dropest.sh
-dropReport.Rsc -> dropest.sh
-```
+- [0.8.6](/high-throughput-sequencing/dropest/0.8.6)

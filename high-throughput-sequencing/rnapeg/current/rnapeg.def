@@ -1,0 +1,4 @@
+bootstrap: docker
+from: mnedmonson/public:rnapeg
+
+

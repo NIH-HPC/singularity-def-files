@@ -1,14 +1,3 @@
-# [AscatNGS](https://hpc.nih.gov/apps/ascatNgs.html)
-
-Create the following symbolic links:
-```
-ascatCnToVCF.pl -> ascatngs.sh
-ascatFaiChunk.pl -> ascatngs.sh
-ascatFailedCnCsv.pl -> ascatngs.sh
-ascat.pl -> ascatngs.sh
-ascatSnpPanelFromVcfs.pl -> ascatngs.sh
-ascatSnpPanelGcCorrections.pl -> ascatngs.sh
-ascatSnpPanelGenerator.pl -> ascatngs.sh
-ascatSnpPanelMerge.pl -> ascatngs.sh
-ascatToBigWig.pl -> ascatngs.sh
-```
+# [ascatngs](https://hpc.nih.gov/apps/ascatNgs.html)
+- [4.3.4](/high-throughput-sequencing/ascatngs/4.3.4)
+- [4.3.3](/high-throughput-sequencing/ascatngs/4.3.3)

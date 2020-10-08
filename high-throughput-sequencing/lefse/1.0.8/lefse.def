@@ -1,0 +1,34 @@
+BootStrap: docker
+From: continuumio/miniconda:4.7.12-alpine
+
+################################################################################
+%post
+################################################################################
+
+export LC_ALL=C
+. /opt/conda/etc/profile.d/conda.sh
+
+# create the lefse environment
+conda activate base
+conda update --all --yes
+conda deactivate
+conda create -n lefse --yes
+conda activate lefse
+#conda config --env --append channels conda-forge
+conda config --env --append channels bioconda
+conda install --yes lefse=1.0.8
+conda clean --yes --all
+
+# create the biowulf specific directories for binding file systems
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+for i in $(seq 20); do 
+    ln -s /gpfs/gsfs$i /gs$i
+done
+
+
+################################################################################
+%environment
+################################################################################
+PATH="/opt/conda/envs/lefse/bin:/bin:/usr/bin:/usr/local/bin"
+export LC_ALL=C
+

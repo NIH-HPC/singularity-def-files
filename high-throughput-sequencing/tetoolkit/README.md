@@ -1,7 +1,2 @@
 # [tetoolkit](https://hpc.nih.gov/apps/tetoolkit.html)
-
-Create the following symbolic links:
-```
-TEtranscripts -> wrapper.sh
-TEcount -> wrapper.sh
-```
+- [2.1.4](/high-throughput-sequencing/tetoolkit/2.1.4)

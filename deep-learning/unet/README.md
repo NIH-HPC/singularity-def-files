@@ -1,6 +1,2 @@
 # [unet](https://hpc.nih.gov/apps/unet.html)
-
-Create the following symbolic links:
-```
-unet-pt -> wrapper.sh
-```
+- [20180704](/deep-learning/unet/20180704)

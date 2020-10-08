@@ -1,9 +1,2 @@
 # [sicer](https://hpc.nih.gov/apps/sicer.html)
-
-Create the following symbolic links:
-```
-recognicer -> wrapper.sh
-recognicer_df -> wrapper.sh
-sicer -> wrapper.sh
-sicer_df -> wrapper.sh
-```
+- [2-1.0.2](/high-throughput-sequencing/sicer/2-1.0.2)

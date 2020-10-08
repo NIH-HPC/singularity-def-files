@@ -1,6 +1,2 @@
 # [DEXTR-PyTorch](https://hpc.nih.gov/apps/dextr-pytorch.html)
-
-Create the following symbolic links:
-```
-dpt -> wrapper.sh
-```
+- [20180710](/deep-learning/dextr-pytorch/20180710)

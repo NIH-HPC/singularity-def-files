@@ -12,4 +12,5 @@ This is a very broad category of applications that are not strictly science rela
 - [snp-sites](/utilities/snp-sites)
 - [sysbench](/utilities/sysbench)
 - [uropa](/utilities/uropa)
+- [vcf2db](/utilities/vcf2db)
 - [whatshap](/utilities/whatshap)

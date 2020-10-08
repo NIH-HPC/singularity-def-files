@@ -1,6 +1,2 @@
 # [macs](https://hpc.nih.gov/apps/macs.html)
-
-Create the following symbolic links:
-```
-macs2 -> wrapper.sh
-```
+- [2.2.7.1](/high-throughput-sequencing/macs/2.2.7.1)

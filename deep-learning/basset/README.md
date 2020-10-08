@@ -1,3 +1,2 @@
 # [basset](https://hpc.nih.gov/apps/Basset.html)
-
-Instead of making symlinks to a wrapper script, the wrapper script itself is named basset and is made executable. 
+- [0.1.0](/deep-learning/basset/0.1.0)

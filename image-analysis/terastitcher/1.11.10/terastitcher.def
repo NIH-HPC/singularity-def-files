@@ -1,0 +1,25 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get update
+    apt-get -y install build-essential wget
+    apt-get update
+    apt-get clean
+
+    # need to copy in terastitcher from GitHub
+    tar -C /opt -x -z -f /tmp/TeraStitcher-portable-1.11.10-Linux.tar.gz
+    chmod -R a+rX /opt/TeraStitcher-portable-1.11.10-Linux
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /vf /scratch /lscratch /data /fdb /usr/local/apps
+    for i in {4..16}; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C
+    export PATH=$PATH:/opt/TeraStitcher-portable-1.11.10-Linux
+

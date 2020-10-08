@@ -1,8 +1,2 @@
 # [PePr](https://hpc.nih.gov/apps/PePr.html)
-
-Create the following symbolic links:
-```
-PePr -> wrapper.sh
-PePr-preprocess -> wrapper.sh
-PePr-postprocess -> wrapper.sh
-```
+- [1.1.24](/high-throughput-sequencing/pepr/1.1.24)

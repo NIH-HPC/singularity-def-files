@@ -1,6 +1,3 @@
 # [smoove](https://hpc.nih.gov/apps/smoove.html)
-
-Create the following symbolic links:
-```
-smoove -> wrapper.sh
-```
+- [0.2.5](/sequence-analysis/smoove/0.2.5)
+- [0.2.1](/sequence-analysis/smoove/0.2.1)

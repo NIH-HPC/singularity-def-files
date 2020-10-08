@@ -1,6 +1,2 @@
 # [ResMap](https://hpc.nih.gov/apps/ResMap.html)
-
-Create the following symbolic links:
-```
-ResMap -> wrapper.sh
-```
+- [1.95](/image-analysis/resmap/1.95)

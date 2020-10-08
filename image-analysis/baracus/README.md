@@ -1,6 +1,2 @@
 # [baracus](https://hpc.nih.gov/apps/baracus.html)
-
-Create the following symbolic links:
-```
-baracus -> wrapper.sh
-```
+- [1.1.4](/image-analysis/baracus/1.1.4)

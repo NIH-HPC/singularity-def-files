@@ -1,6 +1,2 @@
 # [whatshap](https://hpc.nih.gov/apps/whatshap.html)
-
-Create the following symbolic links:
-```
-whatshap -> wrapper.sh
-```
+- [0.18](/utilities/whatshap/0.18)

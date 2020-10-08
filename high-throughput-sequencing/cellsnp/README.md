@@ -1,7 +1,2 @@
 # [cellsnp](https://hpc.nih.gov/apps/cellsnp.html
-cellsnp.html~)
-
-Create the following symbolic links:
-```
-cellSNP -> wrapper.sh
-```
+- [0.1.7](/high-throughput-sequencing/cellsnp/0.1.7)

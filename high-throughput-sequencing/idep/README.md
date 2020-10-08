@@ -1,3 +1,2 @@
 # [idep](https://hpc.nih.gov/apps/idep.html)
-
-Instead of creating a symlink to a wrapper file, idep simply has a single executable script.
+- [0.81](/high-throughput-sequencing/idep/0.81)

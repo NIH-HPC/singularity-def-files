@@ -1,6 +1,2 @@
 # [broccoli](https://hpc.nih.gov/apps/broccoli.html)
-
-Create the following symbolic links:
-```
-broccolipipeline -> wrapper.sh
-```
+- [1.0.1](/image-analysis/broccoli/1.0.1)

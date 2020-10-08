@@ -1,8 +1,2 @@
 # [sonicparanoid](https://hpc.nih.gov/apps/sonicparanoid.html)
-
-Create the following symbolic links:
-```
-sonicparanoid-extract -> sonicparanoid.sh
-sonicparanoid -> sonicparanoid.sh
-sonicparanoid-get-test-data -> sonicparanoid.sh
-```
+- [1.3.2](/sequence-analysis/sonicparanoid/1.3.2)

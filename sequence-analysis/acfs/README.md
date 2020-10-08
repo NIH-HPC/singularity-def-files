@@ -1,8 +1,2 @@
 # [ACFS](https://hpc.nih.gov/apps/ACFS.html)
-
-
-Create the following symbolic links:
-```
-acfs -> wrapper.sh
-
-```
+- [20180316](/sequence-analysis/acfs/20180316)

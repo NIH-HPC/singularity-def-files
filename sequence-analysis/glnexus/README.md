@@ -1,6 +1,2 @@
 # [glnexus](https://hpc.nih.gov/apps/glnexus.html)
-
-Create the following symbolic links:
-```
-glnexus -> wrapper.sh
-```
+- [1.1.11](/sequence-analysis/glnexus/1.1.11)

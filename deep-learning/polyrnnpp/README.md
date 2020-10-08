@@ -1,6 +1,2 @@
 # [PolyRNNpp](https://hpc.nih.gov/apps/polyrnnpp.html)
-
-Create the following symbolic links:
-```
-prpp -> wrapper.sh
-```
+- [20180718](/deep-learning/polyrnnpp/20180718)

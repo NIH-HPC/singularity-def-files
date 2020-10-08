@@ -1,6 +1,2 @@
 # [transvar](https://hpc.nih.gov/apps/transvar.html)
-
-Create the following symbolic links:
-```
-transvar -> transvar.sh
-```
+- [2.5.9](/high-throughput-sequencing/transvar/2.5.9)

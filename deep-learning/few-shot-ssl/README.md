@@ -1,6 +1,2 @@
 # [few-shot-ssl](https://hpc.nih.gov/apps/few-shot-ssl.html)
-
-Create the following symbolic links:
-```
-few-shot -> wrapper.sh
-```
+- [20180723](/deep-learning/few-shot-ssl/20180723)

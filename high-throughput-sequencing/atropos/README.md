@@ -1,7 +1,2 @@
 # [Atropos](https://hpc.nih.gov/apps/atropos.html)
-
-Create the following symbolic links:
-```
-
-atropos -> wrapper.sh
-```
+- [1.1.18](/high-throughput-sequencing/atropos/1.1.18)

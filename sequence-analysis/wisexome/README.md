@@ -1,6 +1,2 @@
 # [wisexome](https://hpc.nih.gov/apps/wisexome.html)
-
-Create the following symbolic links:
-```
-wexome -> wrapper.sh
-```
+- [20180814](/sequence-analysis/wisexome/20180814)

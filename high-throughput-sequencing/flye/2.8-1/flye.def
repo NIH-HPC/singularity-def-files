@@ -1,0 +1,32 @@
+BootStrap: debootstrap
+OSVersion: stable
+MirrorURL: http://ftp.us.debian.org/debian/
+
+################################################################################
+%post
+################################################################################
+apt-get update
+apt-get install -y vim gcc make git g++ curl bzip2 python3 wget zlib1g-dev \
+  python3-pip python3-setuptools python-pip
+apt-get clean
+
+APP=Flye
+APPVER=2.8-1
+cd /opt
+git clone https://github.com/fenderglass/Flye.git
+cd Flye
+git checkout ${APPVER}
+pip install setuptools
+python setup.py build
+
+# mount points
+#
+mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+for i in $(seq 2 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+################################################################################
+%environment
+################################################################################
+export LC_ALL=C
+export PATH=/opt/Flye/bin:$PATH
+

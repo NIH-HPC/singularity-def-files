@@ -1,6 +1,2 @@
 # [HTGTSrep](https://hpc.nih.gov/apps/HTGTSrep.html)
-
-Create the following symbolic links:
-```
-htgtsrep -> HTGTSrep.sh
-```
+- [9fe74ff](/sequence-analysis/htgtsrep/9fe74ff)

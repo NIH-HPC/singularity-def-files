@@ -1,0 +1,51 @@
+BootStrap: docker
+From: ubuntu
+
+%post
+    apt-get update
+    apt-get install -y wget
+    apt-get install -y unzip
+    apt-get install -y git
+    apt-get install -y curl    
+
+    ## zlib
+    apt-get install -y zlib1g-dev
+
+    ## g++
+    apt-get install -y build-essential
+    
+    # miniconda
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    conda update --yes --all
+    conda create -n app python=3.7 nose cython numpy
+    conda activate app
+    conda config --add channels conda-forge
+    conda config --add channels bioconda
+    conda config --add channels r
+    conda install pysam bx-python pyBigWig
+
+
+    # Install rseqc
+    cd /opt
+    echo "Installing latest rseqc release ..."
+    wget https://sourceforge.net/projects/rseqc/files/RSeQC-4.0.0.tar.gz
+    tar xvfz RSeQC-4.0.0.tar.gz
+    cd RSeQC-4.0.0/
+    python setup.py install
+    
+
+    # create bind points for NIH HPC environment
+    mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+    for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+    # clean up
+    apt-get clean
+    conda clean --yes --all
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/conda/envs/app/bin:$PATH
+

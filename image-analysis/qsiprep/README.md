@@ -1,6 +1,2 @@
 # [qsiprep](https://hpc.nih.gov/apps/qsiprep.html)
-
-Create the following symbolic links:
-```
-qsiprep -> wrapper.sh
-```
+- [0.8.0](/image-analysis/qsiprep/0.8.0)

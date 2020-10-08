@@ -1,11 +1,3 @@
 # [deepvariant](https://hpc.nih.gov/apps/deepvariant.html)
-
-Create the following symbolic links:
-```
-run_deepvariant -> wrapper.sh
-make_examples -> wrapper.sh
-call_variants -> wrapper.sh
-postprocess_variants -> wrapper.sh
-model_eval -> wrapper.sh
-model_train -> wrapper.sh
-```
+- [0.10.0](/high-throughput-sequencing/deepvariant/0.10.0)
+- [0.9.0](/high-throughput-sequencing/deepvariant/0.9.0)

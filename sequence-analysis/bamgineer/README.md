@@ -1,6 +1,2 @@
 # [bamgineer](https://hpc.nih.gov/apps/bamgineer.html)
-
-Create the following symbolic links:
-```
-simulate.py -> wrapper.sh
-```
+- [2-20200624](/sequence-analysis/bamgineer/2-20200624)

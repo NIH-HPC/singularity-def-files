@@ -1,8 +1,2 @@
 # [ANNOgesic](https://hpc.nih.gov/apps/ANNOgesic.html)
-
-
-Create the following symbolic links:
-```
-ag -> wrapper.sh
-
-```
+- [1.0.2](/sequence-analysis/annogesic/1.0.2)

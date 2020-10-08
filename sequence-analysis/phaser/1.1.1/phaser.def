@@ -1,0 +1,101 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    singularity cache clean --force
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Container verified"
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q "$MESSG"
+
+%post
+    apt-get update
+    apt-get install -y wget git gcc autoconf automake make perl zlib1g-dev \
+        libbz2-dev liblzma-dev libcurl4-gnutls-dev libssl-dev libncurses5-dev \
+        tabix libgsl-dev
+
+    # install miniconda (so I can control python and pip version)
+    cd /tmp
+    if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    fi
+    bash Miniconda3-latest-Linux-x86_64.sh -p /opt/conda -b
+    . /opt/conda/etc/profile.d/conda.sh
+    conda update -n base -c defaults conda
+    rm Miniconda3-latest-Linux-x86_64.sh
+    conda create -c bioconda -n x python=2.7 cython==0.29.14 biopython==1.68 \
+        scipy==1.2.1 pysam==0.15.3 pyvcf==0.6.8 pandas==0.24.2 \
+        intervaltree==3.0.2 
+    conda activate x
+
+    # install samtools
+    cd /tmp
+    if [ ! -d samtools-1.10 ]; then
+        wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.10.tar.bz2
+        tar xf samtools-1.10.tar.bz2
+        rm samtools-1.10.tar.bz2
+    fi
+    cd samtools-1.10
+    ./configure --prefix=/usr/local
+    make && make install
+
+    # install bedtools
+    wget -O /usr/local/bin/bedtools \
+        https://github.com/arq5x/bedtools2/releases/download/v2.29.2/bedtools.static.binary
+    chmod 755 /usr/local/bin/bedtools
+
+    # install bcftools
+    cd /opt
+    git clone git://github.com/samtools/htslib.git
+    git clone git://github.com/samtools/bcftools.git
+    cd bcftools
+    make
+    make install 
+
+    # install phaser
+    cd /opt
+    git clone "https://github.com/secastel/phaser.git"
+    cd phaser
+    git checkout 8e9a24d
+    cd phaser
+    python setup.py build_ext --inplace
+
+    # replace shebangs in 3 scripts with conda version, make them executable and
+    # available
+    cd ..
+    sed -i '1c\#!/opt/conda/envs/x/bin/python' phaser/phaser.py
+    sed -i '1 i #!/opt/conda/envs/x/bin/python' phaser_annotate/phaser_annotate.py
+    sed -i '1 i #!/opt/conda/envs/x/bin/python' phaser_gene_ae/phaser_gene_ae.py
+    chmod 755 phaser/phaser.py
+    chmod 755 phaser_annotate/phaser_annotate.py
+    chmod 755 phaser_gene_ae/phaser_gene_ae.py
+    ln -s /opt/phaser/phaser/phaser.py /usr/local/bin/phaser.py
+    ln -s /opt/phaser/phaser_annotate/phaser_annotate.py \
+        /usr/local/bin/phaser_annotate.py
+    ln -s /opt/phaser/phaser_gene_ae/phaser_gene_ae.py \
+        /usr/local/bin/phaser_gene_ae.py
+
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+    
+    apt-get purge -y wget git gcc autoconf automake make
+    apt-get autoremove -y
+    apt-get clean
+
+%environment
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate x
+

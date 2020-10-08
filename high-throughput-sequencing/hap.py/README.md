@@ -1,7 +1,2 @@
 # [hap.py](https://hpc.nih.gov/apps/hap.py.html)
-
-Create the following symbolic links:
-```
-hap.py -> wrap
-som.py -> wrap
-```
+- [0.3.9](/high-throughput-sequencing/hap.py/0.3.9)

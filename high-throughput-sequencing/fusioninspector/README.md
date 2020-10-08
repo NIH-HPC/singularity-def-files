@@ -1,6 +1,2 @@
 # [fusioninspector](https://hpc.nih.gov/apps/fusioninspector.html)
-
-Create the following symbolic links:
-```
-FusionInspector -> fusioninspector.sh
-```
+- [2.3.0](/high-throughput-sequencing/fusioninspector/2.3.0)

@@ -1,10 +1,2 @@
 # [metabat](https://hpc.nih.gov/apps/metabat.html)
-
-Create the following symbolic links:
-```
-runMetaBat.sh -> wrap
-jgi_summarize_bam_contig_depths -> wrap
-metabat -> wrap
-metabat1 -> wrap
-metabat2 -> wrap
-```
+- [2.13](/high-throughput-sequencing/metabat/2.13)

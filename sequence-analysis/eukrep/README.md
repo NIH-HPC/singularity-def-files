@@ -1,6 +1,2 @@
 # [EukRep](https://hpc.nih.gov/apps/EukRep.html)
-
-Create the following symbolic links:
-```
-EukRep -> wrapper.sh
-```
+- [20180308](/sequence-analysis/eukrep/20180308)

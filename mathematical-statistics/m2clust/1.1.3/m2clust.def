@@ -1,0 +1,44 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    rm -rf  /root/.singularity/cache/library
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Data integrity verified"
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256*/* | \
+    grep -q "$MESSG"
+
+%post
+    echo "deb http://us-west-2.ec2.archive.ubuntu.com/ubuntu/ trusty multiverse
+    deb http://us-west-2.ec2.archive.ubuntu.com/ubuntu/ trusty-updates multiverse
+    deb http://us-west-2.ec2.archive.ubuntu.com/ubuntu/ trusty-backports main restricted universe multiverse" | \
+    tee /etc/apt/sources.list.d/multiverse.list
+    apt-get update
+    echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+    apt-get install -y python3 python3-pip fontconfig ttf-mscorefonts-installer -qq
+    fc-cache -f -v
+    cd /usr/bin
+    ln -s python3 python
+    ln -s pip3 pip
+
+    pip install m2clust==1.1.3
+
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%runscript
+    m2clust "$@"
+

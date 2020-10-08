@@ -1,6 +1,2 @@
 # [gdc-client](https://hpc.nih.gov/apps/gdc-client.html)
-
-Create the following symbolic links:
-```
-gdc-client -> wrapper.sh
-```
+- [1.5.0](/utilities/gdc-client/1.5.0)

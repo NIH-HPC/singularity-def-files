@@ -1,6 +1,2 @@
 # [gubbins](https://hpc.nih.gov/apps/gubbins.html)
-
-Create the following symbolic links:
-```
-gubbins -> wrapper.sh
-```
+- [2.3.4](/linkage-phylogenetics/gubbins/2.3.4)

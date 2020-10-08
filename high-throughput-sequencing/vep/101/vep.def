@@ -1,0 +1,120 @@
+BootStrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+    echo "Hello from inside the container"
+    sed -i 's/$/ universe/' /etc/apt/sources.list
+    apt-get update
+    apt-get clean
+    apt-get -y install apache2 build-essential cpanminus curl git libmysqlclient-dev
+    apt-get update
+    apt-get clean
+    apt-get -y install libpng12-dev libssl-dev manpages mysql-client openssl
+    apt-get update
+    apt-get clean
+    apt-get -y install perl perl-base unzip vim wget python2.7 python2.7-mysqldb
+    apt-get update
+    apt-get clean
+    apt-get -y install libncurses5-dev libbz2-dev liblzma-dev libcurl4-openssl-dev
+    apt-get update
+    apt-get clean
+
+# Build samtools
+    cd /tmp
+    wget https://github.com/samtools/samtools/releases/download/1.8/samtools-1.8.tar.bz2
+    tar xjf samtools-1.8.tar.bz2
+    cd samtools-1.8
+    sed -i 's/SORT_MIN_MEGS_PER_THREAD = 1/SORT_MIN_MEGS_PER_THREAD = 250/' bam_sort.c
+    sed -i 's/minimum value of 1M for this setting/minimum value of 250M for this setting/' samtools.1
+    ./configure --enable-plugins --enable-gcs --enable-libcurl --prefix=/opt/samtools
+    make all all-htslib
+    make test
+    make install install-htslib
+    cd ..
+    rm -rf samtools-1.8
+
+# Build everything in /opt
+    cd /opt
+    git clone --branch release/101 https://github.com/Ensembl/ensembl.git
+    git clone --branch release/101 https://github.com/Ensembl/ensembl-vep.git
+
+# Get VEP dependencies...
+    ./ensembl-vep/travisci/get_dependencies.sh
+    #export PERL5LIB=$PERL5LIB:/opt/bioperl-live-release-1-6-924
+    export PERL5LIB=$PERL5LIB:/opt/bioperl-live
+    export KENT_SRC=/opt/kent-335_base/src
+    export HTSLIB_DIR=/opt/htslib
+    export MACHTYPE=x86_64
+    export CFLAGS="-fPIC"
+    export DEPS=/opt
+
+# ... and run the complilation/install as root
+    ./ensembl-vep/travisci/build_c.sh
+
+# install htslib binaries (need bgzip, tabix)
+    cd $HTSLIB_DIR
+    make install
+
+# install bioperl-ext, faster alignments for haplo
+    cd /opt
+    git clone https://github.com/bioperl/bioperl-ext.git
+    cd bioperl-ext/Bio/Ext/Align/
+    perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
+    perl Makefile.PL
+    make
+    make install
+
+# Include DBD::SQLite for the PolyPhen_SIFT plugin, Bio::DB::BigFile for LoF plugin
+    cd /opt
+    echo "requires 'DBD::SQLite';" >> ensembl-vep/cpanfile
+    echo "requires 'Bio::DB::BigFile';" >> ensembl-vep/cpanfile
+
+# install perl dependencies
+    cd /opt
+    cpanm --installdeps --with-recommends --notest --cpanfile ensembl/cpanfile .
+    cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile .
+
+# run INSTALL.pl
+    cd /opt/ensembl-vep
+    chmod u+x INSTALL.pl
+    ./INSTALL.pl -a a -l
+
+# Math::CDF will be required for the Carol plugin
+    cd /opt
+    wget http://search.cpan.org/CPAN/authors/id/C/CA/CALLAHAN/Math-CDF-0.1.tar.gz
+    tar xzf Math-CDF-0.1.tar.gz
+    cd Math-CDF-0.1
+    perl Makefile.PL
+    make
+    make install
+    cd /opt
+    rm -rf Math*
+
+# Compile GeneSplicer
+    cd /opt
+    wget https://hpc.nih.gov/download/GeneSplicer.tar.gz
+    tar xzf GeneSplicer.tar.gz
+    chown -R root.root GeneSplicer
+    find GeneSplicer -type f -exec chmod a+r {} +
+    find GeneSplicer -type f -perm /u+x -exec chmod a+x {} +
+    find GeneSplicer -type d -exec chmod a+rx {} +
+    cd GeneSplicer/sources
+    make
+    mv genesplicer ../bin/.
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /vf /lscratch /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+    ln -s /spin1/USERS1 /data
+    ln -s /vf/db /fdb
+    ln -s /spin1/pdb /pdb
+    ln -s /spin1/scratch /scratch
+
+
+%environment
+    export LC_ALL=C
+    export PATH=$PATH:/opt/ensembl-vep:/opt/htslib:/opt/samtools/bin
+

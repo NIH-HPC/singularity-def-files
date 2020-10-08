@@ -1,6 +1,2 @@
 # [seqlinkage](https://hpc.nih.gov/apps/seqlinkage.html)
-
-Create the following symbolic links:
-```
-seqlink -> wrap
-```
+- [1.0](/high-throughput-sequencing/seqlinkage/1.0)

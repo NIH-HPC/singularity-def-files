@@ -1,0 +1,67 @@
+BootStrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+   Author:Antonio Ulloa
+
+%post   
+   # install dependencies
+   apt-get -y update
+   apt-get install -y curl wget nano bzip2 less git
+   apt-get install -y libgl1-mesa-glx libgl1-mesa-dev freeglut3 libx11-dev libxtst6 libfontconfig libdbus-1-3 mesa-utils
+   
+
+   # install Qt
+   cd / && mkdir Qt
+   wget http://download.qt.io/official_releases/qt/5.9/5.9.0/qt-opensource-linux-x64-5.9.0.run
+   git clone https://github.com/benlau/qtci
+   qtci/bin/extract-qt-installer qt-opensource-linux-x64-5.9.0.run /Qt
+   rm -rf qtci qt-opensource-linux-x64-5.9.0.run
+
+   # install mrtrix
+   mkdir -p /opt
+   wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+   bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+   . /opt/conda/etc/profile.d/conda.sh
+   conda activate base
+   conda update --yes --all
+   conda create -n hicexplorer python=3.6 --yes 
+   conda activate hicexplorer
+   conda config --env --add channels defaults
+   conda config --env --add channels conda-forge
+   conda config --env --add channels bioconda
+   conda install --yes numpy=1.17 
+   conda install --yes scipy=1.3 
+   conda install --yes matplotlib=3.1 
+   conda install --yes bioconda::pysam==0.15
+   conda install --yes intervaltree=3.0
+   conda install --yes biopython=1.74
+   conda install --yes pytables=3.5
+   conda install --yes pyBigWig=0.3
+   conda install --yes future=0.17
+   conda install --yes jinja2=2.10
+   conda install --yes pandas=0.25
+   conda install --yes unidecode=1.1
+   conda install --yes hicmatrix=11
+   conda install --yes pygenometracks=3.0
+   conda install --yes psutil=5.6
+   conda install --yes hic2cool=0.7
+   conda install --yes cooler=0.8.5
+   conda install --yes krbalancing=0.0.5
+   conda install --yes fit_nbinom=1.1
+   conda install --yes pybedtools=0.8
+   conda install --yes hicexplorer -c bioconda -c conda-forge
+
+   # create bind points for NIH HPC environment
+   mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+   for i in $(seq 1 30); do ln -s /gpfs/gsfs${i} /gs${i}; done
+
+   # clean up
+   apt-get clean
+   conda clean --yes --all
+
+%environment
+   export LC_ALL=C
+   export PATH=/opt/conda/envs/hicexplorer/bin:${PATH}
+   export LD_LIBRARY_PATH=/lib64:${LD_LIBRARY_PATH}
+

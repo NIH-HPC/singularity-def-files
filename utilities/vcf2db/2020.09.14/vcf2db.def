@@ -1,0 +1,47 @@
+BootStrap: docker
+From: ubuntu:bionic
+
+%post
+    apt-get update
+    apt-get install -y wget  
+    apt-get install -y unzip 
+    apt-get install -y git   
+    apt-get install -y curl  
+
+    ## zlib
+    # apt-get install -y zlib1g-dev
+
+    ## g++
+    # apt-get install -y build-essential
+
+    # miniconda
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    bash Miniconda2-latest-Linux-x86_64.sh -f -b -p /opt/conda
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    conda update --yes --all
+    conda create --yes -n app python=2.7 nose cython numpy
+    conda activate app
+    conda install --yes snappy
+    conda install --yes -c conda-forge python-snappy
+    conda install --yes -c bioconda cyvcf2 peddy
+
+    # Install vcf2db
+    cd /opt
+    git clone https://github.com/quinlan-lab/vcf2db
+    cd vcf2db
+    pip install -r requirements.txt
+    chmod 755 vcf2db.py
+
+    # create bind points for NIH HPC environment
+    mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+    for i in $(seq 1 30); do ln -s /gpfs/gsfs$i /gs$i; done
+
+    # clean up
+    apt-get clean
+    conda clean --yes --all
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/vcf2db:/opt/conda/envs/app/bin:$PATH
+

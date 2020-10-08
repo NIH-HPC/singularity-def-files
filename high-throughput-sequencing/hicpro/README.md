@@ -1,7 +1,2 @@
 # [hicpro](https://hpc.nih.gov/apps/hicpro.html)
-
-Create the following symbolic links:
-```
-hicpro -> wrapper.sh
-HiC-Pro -> wrapper.sh
-```
+- [2.11.4](/high-throughput-sequencing/hicpro/2.11.4)

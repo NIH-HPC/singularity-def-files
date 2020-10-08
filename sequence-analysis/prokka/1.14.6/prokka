@@ -1,0 +1,7 @@
+#! /bin/bash
+
+self="$(readlink -f $0)"
+approot="$(dirname "$self")/.."
+
+export SINGULARITY_BINDPATH="/gpfs,/spin1,/data,/vf,/scratch,/fdb,/lscratch"
+singularity exec "${approot}/libexec/prokka.sif" prokka "$@"

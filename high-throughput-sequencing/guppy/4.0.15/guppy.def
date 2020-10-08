@@ -1,0 +1,28 @@
+BootStrap: docker
+From: nvidia/cuda:10.2-runtime-centos7
+
+######################################################################
+%post
+######################################################################
+
+yum install -y wget
+wget -O /tmp/epel-release-latest-7.noarch.rpm \
+    http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install -y /tmp/epel-release-latest-7.noarch.rpm
+yum install -y hdf5 zeromq
+yum install -y /tmp/ont-guppy-4.0.15-1.el7.x86_64.rpm
+
+# create bind points for NIH HPC environment
+mkdir /data /gpfs /vf
+for i in $(seq 1 20 ); do ln -s /gpfs/gsfs$i /gs$i; done
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/ont/guppy/bin:$PATH
+
+######################################################################
+%runscript
+######################################################################
+

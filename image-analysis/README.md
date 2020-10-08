@@ -9,6 +9,7 @@ Tools for medical imaging, microscopy, and general image analysis.
 - [broccoli](/image-analysis/broccoli)
 - [ctf](/image-analysis/ctf)
 - [deepmedic](/image-analysis/deepmedic)
+- [fitlins](/image-analysis/fitlins)
 - [fmriprep](/image-analysis/fmriprep)
 - [minc-toolkit](/image-analysis/minc-toolkit)
 - [mriqc](/image-analysis/mriqc)

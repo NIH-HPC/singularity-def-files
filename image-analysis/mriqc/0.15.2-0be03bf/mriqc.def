@@ -1,0 +1,14 @@
+Bootstrap: docker
+From: poldracklab/mriqc:0.15.2
+ 
+%post
+sed -i 's/config.nipype.omp_nthreads/config.nipype.omp_nthread/g' /src/mriqc/mriqc/cli/parser.py
+sed -i 's/config.nipype.omp_nthread/config.nipype.omp_nthreads/g' /src/mriqc/mriqc/cli/parser.py
+sed -i 's/config.nipype.omp_nthreads/config.nipype.omp_nthread/g' /usr/local/miniconda/lib/python3.7/site-packages/mriqc/cli/parser.py
+sed -i 's/config.nipype.omp_nthread/config.nipype.omp_nthreads/g' /usr/local/miniconda/lib/python3.7/site-packages/mriqc/cli/parser.py
+# create symbolic links for the NIH HPC systems
+for i in $(seq 1 30)
+do 
+    ln -s /gpfs/gsfs$i /gs$i 
+done
+

@@ -1,11 +1,3 @@
 # [flye](https://hpc.nih.gov/apps/flye.html)
-
-Create the following symbolic links:
-```
-abruijn -> wrapper.sh
-flye -> wrapper.sh
-flye-assemble -> wrapper.sh
-flye-minimap2 -> wrapper.sh
-flye-polish -> wrapper.sh
-flye-repeat -> wrapper.sh
-```
+- [2.8-1](/high-throughput-sequencing/flye/2.8-1)
+- [2.7](/high-throughput-sequencing/flye/2.7)

@@ -1,7 +1,2 @@
 # [bigscale2](https://hpc.nih.gov/apps/bigSCale2.html)
-
-Create the following symbolic links:
-```
-bigscale2 -> wrapper.sh
-bigSCale2 -> wrapper.sh
-```
+- [20191119](/high-throughput-sequencing/bigscale2/20191119)

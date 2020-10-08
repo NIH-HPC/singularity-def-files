@@ -1,6 +1,2 @@
 # [longshot](https://hpc.nih.gov/apps/longshot.html)
-
-Create the following symbolic links:
-```
-longshot -> wrapper.sh
-```
+- [0.3.5](/utilities/longshot/0.3.5)

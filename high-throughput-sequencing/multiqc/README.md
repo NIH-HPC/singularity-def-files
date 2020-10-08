@@ -1,6 +1,2 @@
 # [multiqc](https://hpc.nih.gov/apps/multiqc.html)
-
-Create the following symbolic links:
-```
-multiqc -> wrapper.sh
-```
+- [1.9](/high-throughput-sequencing/multiqc/1.9)

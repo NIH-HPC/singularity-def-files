@@ -1,0 +1,45 @@
+BootStrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+	Author:Qi Yu
+%post
+	export DEBIAN_FRONTEND="noninteractive"
+	apt-get update
+	apt-get -y install perl git python3-pip wget build-essential file cmake 
+
+	# required by bamtools
+	apt-get -y install zlib1g-dev
+	
+	# install bamtools
+	mkdir -p /opt
+	cd /opt
+	git clone https://github.com/pezmaster31/bamtools.git
+	cd bamtools
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=../ ..
+	make
+	make install
+	cd ..
+	
+	# setup env for tpmcalculator
+	export BAMTOOLS_DIR=`pwd`
+	export CPPFLAGS="-I $BAMTOOLS_DIR/include/bamtools/"
+	export LDFLAGS="-L $BAMTOOLS_DIR/lib -Wl,-rpath,$BAMTOOLS_DIR/lib"
+
+	# install tmpcalculator
+	cd /opt
+	git clone https://github.com/ncbi/tpmcalculator
+	cd tpmcalculator
+	make
+	ln -s /opt/tpmcalculator/bin/TPMCalculator /usr/local/bin
+	
+	# make nih hpc specific links
+        mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+        for i in $(seq 1 30); do ln -s /gpfs/gsfs${i} /gs${i}; done
+
+	# clean up
+	apt-get clean
+		
+

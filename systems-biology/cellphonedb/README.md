@@ -1,6 +1,2 @@
 # [cellphonedb](https://hpc.nih.gov/apps/cellphonedb.html)
-
-Create the following symbolic links:
-```
-cellphonedb -> cellphonedb.sh
-```
+- [2.1.2](/systems-biology/cellphonedb/2.1.2)

@@ -1,6 +1,2 @@
 # [snp-sites](https://hpc.nih.gov/apps/snp-sites.html)
-
-Create the following symbolic links:
-```
-snp-sites -> wrapper.sh
-```
+- [2.4.1](/utilities/snp-sites/2.4.1)

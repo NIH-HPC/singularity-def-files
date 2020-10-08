@@ -1,7 +1,2 @@
 # [htseq](https://hpc.nih.gov/apps/htseq.html)
-
-Create the following symbolic links:
-```
-htseq-count -> wrapper.sh
-htseq-qa -> wrapper.sh
-```
+- [0.11.4](/high-throughput-sequencing/htseq/0.11.4)
