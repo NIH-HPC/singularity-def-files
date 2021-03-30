@@ -1,0 +1,68 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%files
+. /app
+
+%post
+   # create directory specific to NIH HPC
+   mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+   # create symbolic links for the NIH HPC systems
+   for i in $(seq 1 30)
+   do 
+      ln -s /gpfs/gsfs${i} /gs${i} 
+   done
+
+   touch /etc/timezone
+
+   export DEBIAN_FRONTEND=noninteractive
+   export TZ=America/New_York && \
+   ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+   # apt-get update and install global requirements
+   apt-get clean all && \
+   apt-get update && \
+   apt-get upgrade -y && \
+   apt-get install -y \
+   autoconf \
+   autogen \
+   build-essential \
+   curl \
+   libbz2-dev \
+   libcurl4-openssl-dev \
+   libhts3 \
+   libhts-dev \
+   liblzma-dev \
+   libncurses5-dev \
+   libnss-sss \
+   libssl-dev \
+   libxml2-dev \
+   ncbi-blast+ \
+   r-base \
+   r-bioc-biostrings \
+   r-bioc-rsamtools \
+   r-cran-biocmanager \
+   r-cran-devtools \
+   r-cran-stringr \
+   r-cran-optparse \
+   zlib1g-dev
+
+   # apt-get clean and remove cached source lists
+   apt-get clean && \
+   rm -rf /var/lib/apt/lists/*
+
+   # install global r requirements
+   echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
+   Rscript -e "library(devtools); install_github('mhahsler/rBLAST')"
+
+   # install scramble
+   cd /app/cluster_identifier/src && \
+   make
+   ln -s /app/cluster_identifier/src/build/cluster_identifier /usr/local/bin
+
+%environment
+   export LC_ALL=C.UTF-8
+   export LANG=C.UTF-8
+   export DEBIAN_FRONTEND=noninteractive
+   export LD_LIBRARY_PATH=/usr/local/lib/:${LD_LIBRARY_PATH}
+

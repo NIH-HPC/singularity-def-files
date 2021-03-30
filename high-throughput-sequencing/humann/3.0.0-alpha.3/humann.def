@@ -1,0 +1,49 @@
+BootStrap: docker
+From: debian:buster-slim
+
+######################################################################
+%post
+######################################################################
+APP=humann2
+APPVER=2.8.1
+
+apt-get -y update
+apt-get install -y curl wget nano bzip2
+
+# miniconda
+PREFIX=/opt/conda
+
+
+mkdir -p /opt
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh -f -b -p $PREFIX
+. $PREFIX/etc/profile.d/conda.sh
+conda activate base
+
+conda update --yes --all
+conda config --system --add channels defaults
+conda config --system --add channels bioconda
+conda config --system --add channels conda-forge
+conda config --system --add channels biobakery
+
+conda install --yes anadama2==0.6.3
+conda install --yes biobakery_demos==1.6
+conda install --yes humann2==$APPVER rapsearch=2.24 muscle
+
+humann2_config --update database_folders nucleotide /fdb/humann2/$APPVER/chocophlan
+humann2_config --update database_folders protein /fdb/humann2/$APPVER/uniref
+
+# create bind points for NIH HPC environment
+mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+# clean up
+apt-get clean
+conda clean --yes --all
+
+######################################################################
+%environment
+######################################################################
+export LC_ALL=C
+export PATH=/opt/conda/bin:$PATH
+

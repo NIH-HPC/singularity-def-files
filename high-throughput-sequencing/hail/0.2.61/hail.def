@@ -1,0 +1,36 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    singularity cache clean --force
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Container verified"
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q "$MESSG"
+
+%post
+    apt-get update
+    # install dependencies
+    apt-get -y install build-essential wget bzip2 ca-certificates libglib2.0-0 \
+        libxext6 libsm6 libxrender1 git openjdk-8-jdk openjdk-8-jre python3 \
+        python3-pip
+    apt-get clean
+    cd /usr/bin
+    ln -s python3 python
+    ln -s pip3 pip
+
+    # install hail
+    pip install hail ipython
+
+    mkdir -p /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i}; 
+    done
+

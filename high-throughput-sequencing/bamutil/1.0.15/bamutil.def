@@ -1,0 +1,26 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+Fingerprints: B7761495F83E6BF7686CA5F0C1A7D02200787921
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%post
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+    apt-get update
+    apt-get install -y git build-essential libz-dev
+
+    cd /opt
+    git clone "https://github.com/statgen/bamUtil.git"
+    git clone git://github.com/statgen/libStatGen.git
+    cd libStatGe
+    git checkout v1.0.15
+    cd ../bamUtil
+    git checkout v1.0.15
+    make 
+    make install 

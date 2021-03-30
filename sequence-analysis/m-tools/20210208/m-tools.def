@@ -1,0 +1,121 @@
+Bootstrap: library
+From: godloved/secure/centos8:20200805.0.0
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    singularity cache clean --force
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Container verified"
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q "$MESSG"
+
+%runscript
+    echo "Singularity container for M-Tools 2021-02-08"
+
+%post
+    yum -y update
+    yum -y install -y tar gzip wget less git
+    yum -y group install "Development Tools"
+    yum -y install ruby rubygems rubygem-rake ruby-devel curl-devel openssl-devel
+    yum -y clean all
+
+    # finishm    
+    gem update 
+    gem install finishm
+
+    # orfm
+    mkdir -p /opt    
+    cd /opt
+    wget https://github.com/wwood/OrfM/releases/download/v0.7.1/orfm-0.7.1_Linux_x86_64.tar.gz
+    tar -zxf orfm-0.7.1_Linux_x86_64.tar.gz
+    cp orfm-0.7.1_Linux_x86_64/orfm* /usr/local/bin/
+    rm -rf orfm-0.7.1*
+
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    conda update --yes --all
+    conda clean --yes --all
+
+    # unitem, groopm, bamm
+    conda create -n app1 python=2.7
+    conda activate app1
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda install --yes bamm
+    conda install --yes groopm
+    conda install --yes checkm-genome=1.0.7
+    conda install --yes unitem
+    conda clean --yes --all
+    conda deactivate
+
+    # checkm
+    conda create -n app2
+    conda activate app2
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda install --yes checkm-genome
+    conda clean --yes --all
+    conda deactivate
+
+    # refinem
+    conda create -n app3
+    conda activate app3
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda install --yes refinem
+    conda install --yes htslib=1.9
+    conda clean --yes --all
+    ktUpdateTaxonomy.sh
+    conda deactivate
+
+    # singlem, graftm
+    conda create -n app4
+    conda activate app4
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda install --yes graftm
+    conda install --yes singlem
+    conda clean --yes --all
+    rm -rf /opt/conda/envs/app4/opt/krona/taxonomy
+    ln -s /opt/conda/envs/app3/opt/krona/taxonomy/ /opt/conda/envs/app4/opt/krona/taxonomy
+    conda deactivate
+    
+    # coverm
+    conda create -n app5
+    conda activate app5
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    conda install --yes coverm
+    conda clean --yes --all
+    conda deactivate
+
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30);
+    do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C.UTF-8
+    export PATH=/opt/conda/envs/app1/bin:$PATH
+    export PATH=/opt/conda/envs/app2/bin:$PATH
+    export PATH=/opt/conda/envs/app3/bin:$PATH
+    export PATH=/opt/conda/envs/app4/bin:$PATH
+    export PATH=/opt/conda/envs/app5/bin:$PATH
+

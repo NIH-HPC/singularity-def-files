@@ -1,0 +1,53 @@
+Bootstrap: docker
+From: nvidia/cuda:8.0-runtime-centos7
+
+%post
+   # install dependencies
+   yum install -y wget
+   wget -O /tmp/epel-release-latest-7.noarch.rpm \
+        http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+   yum install -y /tmp/epel-release-latest-7.noarch.rpm
+   yum install -y python3 python3-pip python3-devel
+   yum -y install bzip2 git
+   ln -s /usr/local/cuda-8.0 /usr/local/cuda
+
+   # install topaz
+   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+   bash ~/miniconda.sh -b -p /usr/local/conda
+   /usr/local/conda/bin/conda install -y pillow>=6.2.0 \
+                                         numpy>=1.11 \
+                                         pandas>=0.20.3 \
+                                         scipy>=0.19.1 \
+                                         scikit-learn>=0.19.0 
+   /usr/local/conda/bin/conda install -y -c pytorch pytorch>=1.0.0 \
+                                         torchvision 
+   /usr/local/conda/bin/conda install -y -c anaconda pip 
+   git clone https://github.com/tbepler/topaz
+   cd topaz
+   /usr/local/conda/bin/pip install .
+   
+   # create bind points for NIH HPC environment
+   mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+   for i in $(seq 1 30); do ln -s /gpfs/gsfs${i} /gs${i}; done
+
+   # clean up
+   /usr/local/conda/bin/conda clean --yes --all
+
+%environment
+   export LC_ALL=C
+   export CUDA_HOME=/usr/local/cuda
+   export CONDA_HOME=/usr/local/conda
+   CUDA_LIB=$CUDA_HOME/lib64
+   CUDA_INCLUDE=$CUDA_HOME/include
+   CUDA_BIN=$CUDA_HOME/bin
+   CONDA_BIN=$CONDA_HOME/bin
+   export LD_LIBRARY_PATH=$CUDA_LIB
+   export PATH=$CONDA_BIN:$CUDA_BIN:$PATH
+
+%runscript
+    # commands to be executed when the container runs
+    echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+    echo "PATH: $PATH"
+    echo "Singularity container for Topaz 0.2.5"
+    echo "Arguments received: $*"
+

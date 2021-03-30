@@ -2,3 +2,5 @@
 - [20.1.1](/image-analysis/fmriprep/20.1.1)
 - [20.1.3](/image-analysis/fmriprep/20.1.3)
 - [20.0.5](/image-analysis/fmriprep/20.0.5)
+- [20.2.0](/image-analysis/fmriprep/20.2.0)
+- [20.2.1](/image-analysis/fmriprep/20.2.1)

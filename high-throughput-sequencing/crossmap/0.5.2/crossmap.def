@@ -1,0 +1,35 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+Fingerprints: B7761495F83E6BF7686CA5F0C1A7D02200787921
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%environment
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate x
+
+%post
+    apt-get update
+    apt-get install -y wget
+
+    # install miniconda
+    cd /tmp
+    if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    fi
+    bash Miniconda3-latest-Linux-x86_64.sh -p /opt/conda -b
+    . /opt/conda/etc/profile.d/conda.sh
+    conda update -n base -c defaults conda
+    rm Miniconda3-latest-Linux-x86_64.sh
+
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+    conda create -n x -c bioconda python crossmap
+    cd /opt/conda/envs/x/bin/
+    ln -s CrossMap.py CrossMap
+    ln -s CrossMap.py crossmap

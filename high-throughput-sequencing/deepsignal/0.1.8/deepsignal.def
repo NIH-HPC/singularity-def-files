@@ -1,0 +1,46 @@
+Bootstrap: docker
+From: debian:buster
+
+%post
+	APPVER=0.1.8
+	apt-get update -y
+	apt-get dist-upgrade -y
+	apt-get install -y curl
+	apt-get clean
+	mkdir -p opt
+	cd /opt
+	curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh > Miniconda3-latest-Linux-x86_64.sh
+	bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda
+	rm -f miniconda
+	cd conda
+	. etc/profile.d/conda.sh
+	conda activate base
+	conda install --yes mamba -c conda-forge
+	conda deactivate
+	conda create -n app --yes python=3.7
+	conda activate app
+	conda config --env --add channels bioconda
+	conda config --env --add channels conda-forge
+	# tensorflow 1.13.1 gpu goes awry when conda-forge is first in the order
+	conda config --env --add channels defaults
+	conda config --env --set channel_priority strict
+	mamba install --yes h5py joblib numpy pandas patsy python-dateutil pytz scikit-learn \
+	    scipy six statsmodels ont-tombo tensorflow-gpu==1.13.1
+	conda clean --all --yes
+	cd /opt
+	curl -L https://github.com/bioinfomaticsCSU/deepsignal/archive/v${APPVER}.tar.gz > deepsignal.tgz
+	mkdir deepsignal
+	tar -xz --strip-components 1 -C deepsignal -f deepsignal.tgz
+	rm -f deepsignal.tgz
+	cd deepsignal
+	python setup.py install
+	chmod +x scripts/*
+	
+	
+	# create bind points for NIH HPC environment
+	mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf /models
+	for i in $(seq 1 20); do ln -s /gpfs/gsfs$i /gs$i; done
+
+%environment
+	export LC_ALL=C
+	PATH=/opt/conda/envs/app/bin:/opt/deepsignal/scripts:$PATH

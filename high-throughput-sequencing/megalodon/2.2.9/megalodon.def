@@ -1,0 +1,37 @@
+Bootstrap: docker
+From:  nvidia/cuda:10.2-runtime-centos7
+
+%post
+    yum install -y wget
+    wget -O /tmp/epel-release-latest-7.noarch.rpm \
+         http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    yum install -y /tmp/epel-release-latest-7.noarch.rpm
+    yum install -y hdf5 zeromq zlib-devel python3 python3-pip python3-devel
+    yum install -y /tmp/ont-guppy-4.2.2-1.el7.x86_64.rpm
+    yum -y groupinstall 'Development Tools'
+    cd /usr/bin
+    rm python
+    ln -s python3 python
+    ln -s pip3 pip
+    pip install --upgrade pip
+    pip install numpy ont-pyguppy-client-lib cython wheel
+
+    # install some more models for guppy
+    cd /opt
+    git clone https://github.com/nanoporetech/rerio.git
+    cd rerio
+    git checkout 25737b9
+    ./download_model.py
+    cp -r basecall_models/* /opt/ont/guppy/data/
+    cp -r taiyaki_models/* /opt/ont/guppy/data/
+    chmod -R o+r /opt/ont/guppy/data
+    cd ..
+    rm -rf rerio
+    
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+    pip install megalodon==2.2.9
+

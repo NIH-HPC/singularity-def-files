@@ -1,0 +1,67 @@
+BootStrap: docker
+From: ubuntu:latest
+
+%labels
+	Author:Qi Yu
+%post
+	export DEBIAN_FRONTEND="noninteractive" 
+	apt-get update
+	apt-get -y install perl git wget build-essential 
+	apt-get -y install git-core cmake zlib1g-dev libncurses-dev patch
+	# Install dependence
+	mkdir -p /opt
+	cd /opt
+	
+	# Install htslib
+	apt-get -y install zlib1g-dev libcurl4-openssl-dev liblzma-dev lzma-dev libbz2-dev libssl-dev autoconf 
+	git clone -b 1.10 https://github.com/samtools/htslib.git 
+	cd htslib
+	autoheader
+	autoconf
+	./configure 
+	make
+	make install
+	cd /opt
+	
+	# Install samtools
+        apt-get -y install libncurses5-dev
+        git clone -b 1.10 https://github.com/samtools/samtools.git
+        cd samtools
+        autoheader
+        autoconf -Wno-syntax
+        ./configure
+        make
+        make install
+        cd /opt
+
+	# Install bam-readcount
+        git clone -b samtools-1.10 https://github.com/seqfu/bam-readcount
+	cd bam-readcount
+        cd vendor
+        wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.10.tar.bz2 && \
+        wget https://www.zlib.net/zlib-1.2.11.tar.gz && \
+        wget https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz && \
+        wget http://download.openpkg.org/components/cache/xz/xz-5.2.4.tar.gz && \
+        wget https://curl.haxx.se/download/curl-7.67.0.tar.gz && \
+        wget https://tls.mbed.org/download/mbedtls-2.16.4-apache.tgz
+	#define env for build
+	cd ../
+	mkdir build
+        cd build
+	cmake ..
+	make
+	
+	
+	# make nih hpc specific links
+        mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+        for i in $(seq 1 30); do ln -s /gpfs/gsfs${i} /gs${i}; done
+	
+	# clean up
+	apt-get clean
+
+%environment
+
+	# setting env for braker
+	export PATH=/opt/bam-readcount/build/bin/:$PATH
+	export LC_ALL=C
+

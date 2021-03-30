@@ -4,4 +4,5 @@ Many of these tools are used to render 3D graphics to help scientists better und
 
 ## [Molecular Modeling Graphics](/molecular-modeling-graphics)
 - [ChimeraX](/molecular-modeling-graphics/chimerax)
+- [blender](/molecular-modeling-graphics/blender)
 - [starseqr](/molecular-modeling-graphics/starseqr)

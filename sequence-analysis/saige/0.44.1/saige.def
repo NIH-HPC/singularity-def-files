@@ -1,0 +1,10 @@
+Bootstrap: docker
+From: wzhou88/saige:0.44.1
+
+%post
+
+         # Create links for NIH HPC
+         mkdir /gpfs /spin1 /data /scratch /fdb /lscratch /vf
+         for i in $(seq 1 30); do ln -s /gpfs/gsfs${i} /gs${i}; done
+
+

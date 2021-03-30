@@ -1,0 +1,31 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+Fingerprints: B7761495F83E6BF7686CA5F0C1A7D02200787921
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip r-base r-cran-ggplot2 \
+        r-cran-pheatmap
+
+    cd /usr/bi
+    ln -s python3 python
+    ln -s pip3 pip
+
+    pip install cellphonedb
+    pip uninstall -y scikit-learn
+    pip install scikit-learn==0.22
+    
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C.UTF-8 LANG=C.UTF-8 PYTHONWARNINGS="ignore"
+
+%runscript
+    cellphonedb "$@"

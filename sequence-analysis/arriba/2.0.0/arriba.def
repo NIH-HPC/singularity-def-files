@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: uhrigs/arriba:2.0.0
+
+%environment
+    export PATH=/arriba_v2.0.0:$PATH
+    export LC_ALL=C
+
+%post
+    cd /
+    ln -s ./vf/db/arriba/references ./references
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+

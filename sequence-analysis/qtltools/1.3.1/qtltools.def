@@ -1,0 +1,71 @@
+Bootstrap: library
+From: godloved/secure/ubuntu-bionic
+
+%labels
+    Author: davidgodlove@gmail.com
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    singularity cache clean --force
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=B7761495F83E6BF7686CA5F0C1A7D02200787921
+    MESSG="Container verified"
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q "$MESSG"
+
+%post
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+    # update and install some dependencies
+    export debian_frontend=noninteractive
+    apt-get update
+    apt-get -y install wget zlib1g-dev libbz2-dev lzma-dev curl libcurl4 \
+        libcurl4-openssl-dev  build-essential libgsl-dev libboost-all-dev \
+        gfortran openjdk-8-jdk openjdk-8-jre liblzma-dev
+
+    # install r-mathlib
+    cd /opt
+    cp /tmp/R-*.tar.gz .
+    tar xf R-*.tar.gz
+    rm -rf R-*.tar.gz
+    cd R-*
+    ./configure --with-readline=no --with-x=no
+    cd src/nmath/standalone
+    make
+
+    # install htslib
+    cd /opt
+    wget https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2
+    tar xf htslib-1.3.1.tar.bz2
+    rm -rf htslib-1.3.1.tar.bz2
+    cd htslib-1.3.1
+    ./configure
+    make
+    make install
+
+    # install qtltools
+    cd /opt
+    wget https://qtltools.github.io/qtltools/binaries/QTLtools_1.3.1_source.tar.gz
+    tar xf QTLtools_1.3.1_source.tar.gz
+    rm -rf QTLtools_1.3.1_source.tar.gz
+    cd qtltools
+    sed -i 's/^BOOST_INC=$/BOOST_INC=\/usr\/include/' Makefile
+    sed -i 's/^BOOST_LIB=$/BOOST_LIB=\/usr\/lib\/x86_64-linux-gnu/' Makefile
+    sed -i 's/^RMATH_INC=$/RMATH_INC=\/opt\/R-3.2.2\/src\/include/' Makefile
+    sed -i 's/^RMATH_LIB=$/RMATH_LIB=\/opt\/R-3.2.2\/src\/nmath\/standalone/' Makefile
+    sed -i 's/^HTSLD_INC=$/HTSLD_INC=\/opt\/htslib-1.3.1/' Makefile
+    sed -i 's/^HTSLD_LIB=$/HTSLD_LIB=\/opt\/htslib-1.3.1/' Makefile
+    make
+
+%environment
+    export PATH=/opt/qtltools/bin:$PATH    
+

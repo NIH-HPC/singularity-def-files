@@ -1,0 +1,11 @@
+Bootstrap: docker
+From: quay.io/wtsicgp/ascatngs:4.5.0
+%post
+    apt-get install -y file
+
+    # make nih hpc specific links
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30); do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+

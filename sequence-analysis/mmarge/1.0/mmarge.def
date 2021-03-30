@@ -1,0 +1,74 @@
+bootstrap: library
+From: nitishnarula/secure/ubuntu-focal:20200902
+
+%pre
+    # this is going to delete your cache to make sure you are getting a minty
+    # fresh image from the library
+    singularity cache clean --force
+
+%setup
+    # insert the fingerprint here
+    KEY_FP=53CA588B89E900EC0ED0CF446E20C9F0BAE45D7F
+    MESSG="Container verified"
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q $KEY_FP
+    singularity verify /root/.singularity/cache/library/sha256* | \
+    grep -q "$MESSG"
+
+%runscript
+    echo "singularity container for mmarge v1.0"
+
+%post
+    apt-get -y update
+    apt-get install -y apt-utils make gcc g++ zip unzip wget perl tini curl gnupg
+    
+    echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" >> /etc/apt/sources.list
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    apt-get -y update
+    apt-get install -y r-base r-base-core libssl-dev libcurl4-openssl-dev g++-multilib libxml2-dev
+    apt-get clean
+
+    wget https://gist.githubusercontent.com/nitishnih/fb24693d23ccda7b0bb34ec522903f03/raw/afb2e9222450765217f3e86a9a39f8c291d76c83/install_deseq_edger.R
+    Rscript install_deseq_edger.R
+
+    curl -L https://cpanmin.us | perl - App::cpanminus
+    cpanm Set::IntervalTree
+    cpanm Statistics::Basic
+    cpanm Sys::CPU
+
+    cd /opt
+    wget https://github.com/alexdobin/STAR/archive/2.7.7a.tar.gz
+    tar -xzf 2.7.7a.tar.gz
+
+    cd /opt
+    wget -O bowtie2-2.4.2-linux-x86_64.zip https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.4.2/bowtie2-2.4.2-linux-x86_64.zip/download
+    unzip bowtie2-2.4.2-linux-x86_64.zip
+
+    mkdir -p /opt/homer
+    cd /opt/homer
+    wget http://homer.ucsd.edu/homer/configureHomer.pl
+    perl configureHomer.pl -install
+
+    cd /opt
+    wget http://homer.ucsd.edu/MMARGE/MMARGE_v1.0.tar.gz
+    tar fxvz MMARGE_v1.0.tar.gz
+    cd MMARGE_v1.0
+    sed -i "s/RScript/Rscript/g" configure.pl
+    perl configure.pl -homer_path /opt/homer
+    perl install.pl
+
+    chmod -R a+x /opt/MMARGE_v1.0/bin/
+
+    mkdir -p /vf /gpfs /spin1 /data /scratch /fdb /lscratch
+    for i in $(seq 1 30);
+    do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/STAR-2.7.7a/bin/Linux_x86_64_static:$PATH
+    export PATH=/opt/bowtie2-2.4.2-linux-x86_64:$PATH
+    export PATH=/opt/homer/bin:$PATH
+    export PATH=/opt/MMARGE_v1.0/bin:$PATH
+

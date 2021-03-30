@@ -1,0 +1,29 @@
+BootStrap: docker
+From: library/ubuntu:18.04
+
+%post
+    apt-get update
+    apt-get upgrade -y
+    apt-get install -y git build-essential python3-dev libglew-dev \
+    libpng-dev libfreetype6-dev libxml2-dev \
+    libmsgpack-dev python3-pyqt5.qtopengl libglm-dev libnetcdf-dev
+    mkdir -p /opt/tmp
+    cd /opt/tmp
+    git clone https://github.com/schrodinger/pymol-open-source.git
+    git clone https://github.com/rcsb/mmtf-cpp.git
+    mv mmtf-cpp/include/mmtf* pymol-open-source/include/
+    cd pymol-open-source
+    python3 setup.py build install --prefix=/opt/pymol
+
+# Set the bindpaths
+    mkdir /gpfs /spin1 /scratch /lscratch /data /fdb /usr/local/apps
+    for i in 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ; do
+        ln -s /gpfs/gsfs${i} /gs${i};
+    done
+    ln -s /spin1/USERS1 /data
+    ln -s /vf/db /fdb
+    ln -s /spin1/pdb /pdb
+    ln -s /spin1/scratch /scratch
+
+%environment
+    export PATH=$PATH:/opt/pymol/bin
